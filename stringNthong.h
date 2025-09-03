@@ -3,34 +3,42 @@
 
 #include <stdio.h>
 
-int my_puts(const char * str);
+namespace mystr {
 
-char * my_strchr(const char * str, char c);
+int put(const char * str);
 
-size_t my_strlen(const char * str);
+char * chr(const char * str, const char c);
 
-char * my_strcpy(char * dst, const char * src);
+size_t len(const char * str);
 
-char * my_strncpy(char * dst, const char * src, size_t count);
+char * copy(char * dst, const char * src);
 
-char * my_strcat(char * dst, const char * src);
+char * ncopy(char * dst, const char * src, size_t count);
 
-char * my_strncat(char * dst, const char * src, size_t count);
+char * concat(char * dst, const char * src);
 
-char * my_fgets(char * str, FILE *stream);
+char * nconcat(char * dst, const char * src, size_t count);
 
-char * my_fgetns(char * str, size_t count, FILE *stream);
+char * dupeconcat(const char * first, const char * second);
 
-char * my_strdup(const char * str);
+char * fget(char * str, FILE *stream);
 
-char * my_getline(char * str, FILE * stream);
+char * fnget(char * str, size_t count, FILE *stream);
 
-char * my_getnline(char * str, size_t count, FILE * stream);
+char * dupe(const char * str);
 
-int my_strcmp(const char * first, const char * second);
+char * getl(char * str, FILE * stream);
 
-int my_strncmp(const char * first, const char * second, size_t size);
+char * getnl(char * str, size_t count, FILE * stream);
 
-const char * my_strerror(int errcode);
+int comp(const char * first, const char * second);
+
+int ncomp(const char * first, const char * second, size_t size);
+
+const char * err(int errcode);
+
+char * mult(const char * src, size_t count);
+
+}
 
 #endif

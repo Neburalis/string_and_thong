@@ -1,7 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int my_puts(const char * str) {
+namespace mystr {
+
+int put(const char * str) {
     while (*str != '\0') {
         putchar(*str);
         ++str;
@@ -9,7 +11,7 @@ int my_puts(const char * str) {
     return 0;
 }
 
-char * my_strchr(const char * str, const char c) {
+char * chr(const char * str, const char c) {
     do {
         if (*str == c)
             return (char *) str;
@@ -18,7 +20,7 @@ char * my_strchr(const char * str, const char c) {
     return NULL;
 }
 
-size_t my_strlen(const char * str) {
+size_t len(const char * str) {
     size_t counter = 0;
     while (*str != '\0') {
         ++counter;
@@ -27,7 +29,7 @@ size_t my_strlen(const char * str) {
     return counter;
 }
 
-char * my_strcpy(char * dst, const char * src) {
+char * copy(char * dst, const char * src) {
     char * ans = dst;
     while (*src != '\0') {
         *dst = *src;
@@ -38,11 +40,11 @@ char * my_strcpy(char * dst, const char * src) {
     return ans;
 }
 
-char * my_strncpy(char * dst, const char * src, size_t count) {
+char * ncopy(char * dst, const char * src, size_t count) {
     char * ans = dst;
     if (count == 0)
         return NULL;
-    while (*src != '\0' && count > 1) {
+    while (*src != '\0' && count > 0) {
         *dst = *src;
         ++src;
         ++dst;
@@ -57,7 +59,7 @@ char * my_strncpy(char * dst, const char * src, size_t count) {
     return ans;
 }
 
-char * my_strcat(char * dst, const char * src) {
+char * concat(char * dst, const char * src) {
     char * ans = dst;
     while (*dst != '\0')
         ++dst;
@@ -70,15 +72,15 @@ char * my_strcat(char * dst, const char * src) {
     return ans;
 }
 
-char * my_strncat(char * dst, const char * src, size_t count) {
+char * nconcat(char * dst, const char * src, size_t count) {
     char * ans = dst;
     if (count == 0)
         return NULL;
-    while (*dst != '\0' && count > 1) {
+    while (*dst != '\0' && count > 0) {
         ++dst;
         --count;
     }
-    while (*src != '\0' && count > 1) {
+    while (*src != '\0' && count > 0) {
         *dst = *src;
         ++src;
         ++dst;
@@ -88,7 +90,15 @@ char * my_strncat(char * dst, const char * src, size_t count) {
     return ans;
 }
 
-char * my_fgets(char * str, FILE *stream) {
+char * dupeconcat(const char * first, const char * second) {
+    size_t size = len(first) + len(second) + 1;
+    char * str = (char *) calloc(size, sizeof(char));
+    concat(str, first);
+    concat(str, second);
+    return str;
+}
+
+char * fget(char * str, FILE *stream) {
     if (!stream)
         return NULL;
     char * ans = str;
@@ -101,12 +111,12 @@ char * my_fgets(char * str, FILE *stream) {
     return ans;
 }
 
-char * my_fgetns(char * str, size_t count, FILE *stream) {
+char * fnget(char * str, size_t count, FILE *stream) {
     if (!stream)
         return NULL;
     char * ans = str;
     int ch = 0; // ?
-    while (count > 1 && (ch = getc(stream)) != '\n' && ch != EOF) {
+    while (count > 0 && (ch = getc(stream)) != '\n' && ch != EOF) {
         *str = ch;
         ++str;
         --count;
@@ -115,32 +125,31 @@ char * my_fgetns(char * str, size_t count, FILE *stream) {
     return ans;
 }
 
-char * my_strdup(const char * str) {
-    size_t len = my_strlen(str) + 1; // Чтобы поместился \0
-    char * ans = (char *) calloc(len, sizeof(char));
-    my_strncpy(ans, str, len);
+char * dupe(const char * str) {
+    size_t str_len = len(str) + 1; // Чтобы поместился \0
+    char * ans = (char *) calloc(str_len, sizeof(char));
+    ncopy(ans, str, str_len);
     return ans;
 }
 
-char * my_getline(char * str, FILE * stream) {
+int getl(char * str, FILE * stream) {
     if (!stream)
         return NULL;
     char * ans = str;
     int ch = 0;
-    while ((ch = getc(stream)) != '\n' && ch != EOF) { // ?
+    while ((ch = getc(stream)) != '\n' && ch != EOF) {
         *str = ch;
         ++str;
     }
     *str = '\0';
-    return ans; // todo
 }
 
-char * my_getnline(char * str, size_t count, FILE * stream) { // todo count 1???
+char * getnl(char * str, size_t count, FILE * stream) {
     if (!stream)
         return NULL;
     char * ans = str;
     int ch = 0;
-    while (count > 1 && (ch = getc(stream)) != '\n' && ch != EOF) { // ?
+    while (count > 0 && (ch = getc(stream)) != '\n' && ch != EOF) {
         *str = ch;
         ++str;
         --count;
@@ -149,7 +158,7 @@ char * my_getnline(char * str, size_t count, FILE * stream) { // todo count 1???
     return ans;
 }
 
-int my_strcmp(const char * first, const char * second) {
+int comp(const char * first, const char * second) {
     do {
         if (*first > *second)
             return 1;
@@ -161,7 +170,7 @@ int my_strcmp(const char * first, const char * second) {
     return 0;
 }
 
-int my_strncmp(const char * first, const char * second, size_t size) {
+int ncomp(const char * first, const char * second, size_t size) {
     if (size == 0) {
         return 0;
     }
@@ -177,7 +186,7 @@ int my_strncmp(const char * first, const char * second, size_t size) {
     return 0;
 }
 
-const char * my_strerror(int errcode) {
+const char * err(int errcode) {
     switch (errcode) { // todo errno consts
         case 0:
             return "Success";
@@ -395,6 +404,20 @@ const char * my_strerror(int errcode) {
     }
 }
 
-// char * my_strstr(const char * first, const char * second) {
-//     char * ans = my_strchr()
-// }
+char * mult(const char * src, size_t count) {
+    size_t src_len = len(src);
+    size_t size = src_len * count + 2;
+    char * str = (char *) calloc(size, sizeof(char));
+    char * ans = str;
+    for (; count > 0; --count) {
+        concat(str, src);
+        str += src_len;
+    }
+    return ans;
+}
+
+char * my_strstr(const char * first, const char * second) {
+
+}
+
+}
