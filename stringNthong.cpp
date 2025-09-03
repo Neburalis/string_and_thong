@@ -158,7 +158,7 @@ char * getnl(char * str, size_t count, FILE * stream) {
     return ans;
 }
 
-int comp(const char * first, const char * second) {
+int el_comp(const char * first, const char * second) {
     do {
         if (*first > *second)
             return 1;
@@ -167,6 +167,21 @@ int comp(const char * first, const char * second) {
         ++first;
         ++second;
     } while (*first != '\0' && *second != '\0');
+    return 0;
+}
+
+int comp(const char * first, const char * second) {
+    size_t first_hash = 0;
+    size_t second_hash = 0;
+    while (*first != 0 && *second != 0) {
+        first_hash += *first;
+        second_hash += *second;
+        ++first;
+        ++second;
+        if (first_hash == second_hash)
+            continue;
+        return (first_hash > second_hash) ? 1 : -1;
+    }
     return 0;
 }
 
@@ -416,8 +431,31 @@ char * mult(const char * src, size_t count) {
     return ans;
 }
 
-char * my_strstr(const char * first, const char * second) {
-
+const char * str(const char * haystack, const char * needle) {
+    size_t needle_len = len(needle);
+    if (needle_len == 0)
+        return haystack;
+    if (len(haystack) < needle_len)
+        return NULL;
+    size_t needle_hash = 0;
+    for (int i = 0; i < needle_len; ++i) {
+        needle_hash += needle[i];
+    }
+    const char * ans = haystack;
+    size_t rolling_hash = 0;
+    for (int i = 0; i < needle_len; ++i) {
+        rolling_hash += *ans;
+        ++ans;
+    }
+    while (*ans != '\0') {
+        if (rolling_hash == needle_hash && mystr::comp(haystack, needle) == 0)
+            return haystack;
+        rolling_hash += *ans;
+        rolling_hash -= *haystack;
+        ++ans;
+        ++haystack;
+    }
+    return NULL;
 }
 
 }

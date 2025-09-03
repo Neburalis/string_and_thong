@@ -31,6 +31,8 @@ char * getl(char * str, FILE * stream);
 
 char * getnl(char * str, size_t count, FILE * stream);
 
+int el_comp(const char * first, const char * second);
+
 int comp(const char * first, const char * second);
 
 int ncomp(const char * first, const char * second, size_t size);
@@ -38,6 +40,8 @@ int ncomp(const char * first, const char * second, size_t size);
 const char * err(int errcode);
 
 char * mult(const char * src, size_t count);
+
+char * str(const char * haystack, const char * needle);
 
 }
 
