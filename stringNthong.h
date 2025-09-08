@@ -27,9 +27,7 @@ char * fnget(char * str, size_t count, FILE *stream);
 
 char * dupe(const char * str);
 
-char * getl(char * str, FILE * stream);
-
-char * getnl(char * str, size_t count, FILE * stream);
+size_t getline(char ** ptr, size_t * len, FILE * stream);
 
 int el_comp(const char * first, const char * second);
 
