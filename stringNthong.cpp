@@ -196,7 +196,7 @@ int comp(const char * first, const char * second) {
         ++second;
         if (first_hash == second_hash)
             continue;
-        return (first_hash > second_hash) ? 1 : -1;
+        return (first_hash - second_hash);
     }
     return 0;
 }
@@ -367,6 +367,44 @@ const char * str(const char * haystack, const char * needle) {
         ++haystack;
     }
     return NULL;
+}
+
+/*
+this algorithm (k=33) was first reported by dan bernstein many years ago in comp.lang.c.
+another version of this algorithm (now favored by bernstein) uses xor:
+hash(i) = hash(i - 1) * 33 ^ str[i];
+the magic of number 33 (why it works better than many other constants, prime or not)
+has never been adequately explained.
+*/
+unsigned long hash(unsigned char *str) {
+    unsigned long hash = 5381;
+    int c;
+
+    while (c = *str++)
+        hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
+
+    return hash;
+}
+
+/*
+this algorithm was created for sdbm (a public-domain reimplementation of ndbm) database library.
+it was found to do well in scrambling bits, causing better distribution of the keys and fewer splits.
+it also happens to be a good general hashing function with good distribution.
+the actual function is hash(i) = hash(i - 1) * 65599 + str[i];
+what is included below is the faster version used in gawk.
+[there is even a faster, duff-device version]
+the magic prime constant 65599 (2^6 + 2^16 - 1) was picked out of thin air
+while experimenting with many different constants. this is one of the algorithms
+used in berkeley db (see sleepycat) and elsewhere.
+*/
+unsigned long sdbm(const char * str) {
+    unsigned long hash = 0;
+    int c;
+
+    while (c = *str++)
+        hash = c + (hash << 16) + (hash << 6) - hash;
+
+    return hash;
 }
 
 }
