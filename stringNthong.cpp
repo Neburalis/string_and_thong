@@ -11,7 +11,7 @@ int put(const char * str) {
     return 0;
 }
 
-char * chr(const char * str, const char c) {
+char * find_char(const char * str, const char c) {
     do {
         if (*str == c)
             return (char *) str;
@@ -133,8 +133,7 @@ char * dupe(const char * str) {
 }
 
 // Нахождение ближайшей степени 2 >= x
-unsigned cpl2(unsigned x)
-{
+unsigned cpl2(unsigned x) {
     x = x - 1;
     x = x | (x >> 1);
     x = x | (x >> 2);
@@ -342,7 +341,7 @@ char * mult(const char * src, size_t count) {
     return ans;
 }
 
-const char * str(const char * haystack, const char * needle) {
+const char * find_str(const char * haystack, const char * needle) {
     size_t needle_len = len(needle);
     if (needle_len == 0)
         return haystack;

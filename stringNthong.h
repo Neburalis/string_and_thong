@@ -7,7 +7,7 @@ namespace mystr {
 
 int put(const char * str);
 
-char * chr(const char * str, const char c);
+char * find_char(const char * str, const char c);
 
 size_t len(const char * str);
 
@@ -39,7 +39,29 @@ const char * err(int errcode);
 
 char * mult(const char * src, size_t count);
 
-char * str(const char * haystack, const char * needle);
+char * find_str(const char * haystack, const char * needle);
+
+/*
+this algorithm (k=33) was first reported by dan bernstein many years ago in comp.lang.c.
+another version of this algorithm (now favored by bernstein) uses xor:
+hash(i) = hash(i - 1) * 33 ^ str[i];
+the magic of number 33 (why it works better than many other constants, prime or not)
+has never been adequately explained.
+*/
+unsigned long hash(unsigned char *str);
+
+/*
+this algorithm was created for sdbm (a public-domain reimplementation of ndbm) database library.
+it was found to do well in scrambling bits, causing better distribution of the keys and fewer splits.
+it also happens to be a good general hashing function with good distribution.
+the actual function is hash(i) = hash(i - 1) * 65599 + str[i];
+what is included below is the faster version used in gawk.
+[there is even a faster, duff-device version]
+the magic prime constant 65599 (2^6 + 2^16 - 1) was picked out of thin air
+while experimenting with many different constants. this is one of the algorithms
+used in berkeley db (see sleepycat) and elsewhere.
+*/
+unsigned long sdbm(const char * str);
 
 }
 
