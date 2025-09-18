@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <ctype.h>
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -429,6 +430,18 @@ ssize_t replace_needle_in_haystack
         }
     }
     return count; // Дошли до haystack_len но не встретили '\0'
+}
+
+void move_ptr_to_first_not_alpha_symbol(char ** ptr, int backword) {
+    assert(ptr != NULL);
+    assert(*ptr != NULL);
+
+    while (**ptr != '\0' && !isalpha(**ptr)) {
+        if (backword)
+            --(*ptr);
+        else // forward
+            ++(*ptr);
+    }
 }
 
 /*

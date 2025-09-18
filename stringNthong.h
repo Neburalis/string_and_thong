@@ -46,6 +46,8 @@ ssize_t count_needle_in_haystack(char * haystack, const size_t haystack_len, con
 ssize_t replace_needle_in_haystack
     (char * haystack, const size_t haystack_len, const char src, const char dst);
 
+void move_ptr_to_first_not_alpha_symbol(char ** ptr, int backword);
+
 /*
 this algorithm (k=33) was first reported by dan bernstein many years ago in comp.lang.c.
 another version of this algorithm (now favored by bernstein) uses xor:
