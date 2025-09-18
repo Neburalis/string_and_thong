@@ -1,5 +1,10 @@
+#include <assert.h>
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+
+#include <io_utils.h>
 
 namespace mystr {
 
@@ -366,6 +371,64 @@ const char * find_str(const char * haystack, const char * needle) {
         ++haystack;
     }
     return NULL;
+}
+
+ssize_t count_needle_in_haystack(char * haystack, const size_t haystack_len, const char needle) {
+    assert(haystack != NULL     && "U must pass haystack to count needles");
+    assert(needle   != '\0'       && "U must pass needle other than '\\0'");
+
+    if (haystack == NULL) {
+        errno = EINVAL;
+        ERROR_MSG("U must pass haystack to count needles");
+        return -1;
+    }
+
+    if (needle == '\0') {
+        errno = EINVAL;
+        ERROR_MSG("U must pass needle other than '\\0'");
+        return -1;
+    }
+
+    ssize_t count = 0;
+    char * endptr = haystack + haystack_len;
+    while (haystack != NULL && haystack < endptr) {
+        haystack = strchr(haystack, needle);
+        if (haystack != NULL) {
+            ++count;
+            ++haystack;
+        }
+    }
+    return count; // Дошли до haystack_len но не встретили '\0'
+}
+
+ssize_t replace_needle_in_haystack
+    (char * haystack, const size_t haystack_len, const char src, const char dst) {
+    assert(haystack != NULL         && "U must pass haystack to count needles");
+    assert(src      != '\0'         && "U must pass src other than '\\0'");
+
+    if (haystack == 0) {
+        errno = EINVAL;
+        ERROR_MSG("U must pass haystack to count needles");
+        return -1;
+    }
+
+    if (src == '\0') {
+        errno = EINVAL;
+        ERROR_MSG("U must pass src other than '\\0'");
+        return -1;
+    }
+
+    ssize_t count = 0;
+    char * endptr = haystack + haystack_len;
+    while (haystack != NULL && haystack < endptr) {
+        haystack = strchr(haystack, src);
+        if (haystack != NULL) {
+            ++count;
+            *haystack = dst;
+            ++haystack;
+        }
+    }
+    return count; // Дошли до haystack_len но не встретили '\0'
 }
 
 /*
