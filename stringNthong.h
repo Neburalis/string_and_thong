@@ -19,7 +19,7 @@ int put(const char * str);
  * @return Указатель на найденный символ или NULL если не найден
  * @note Дублирует функцию strchr() из <string.h>. Рекомендуется использовать стандартную версию.
  */
-char * find_char(const char * str, const char c);
+const char * find_char(const char * str, const char c);
 
 /**
  * @brief Вычисляет длину строки
@@ -73,7 +73,7 @@ char * nconcat(char * dst, const char * src, size_t count);
  * @param second Указатель на вторую строку
  * @return Указатель на новую выделенную строку (требует освобождения памяти)
  */
-char * dupeconcat(const char * first, const char * second);
+char * dupe_concat(const char * first, const char * second);
 
 /**
  * @brief Читает строку из файлового потока до символа новой строки

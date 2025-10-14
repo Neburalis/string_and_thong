@@ -5,8 +5,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <io_utils.h>
-
 #include "stringNthong.h"
 
 namespace mystr {
@@ -19,10 +17,10 @@ int put(const char * str) {
     return 0;
 }
 
-char * find_char(const char * str, const char c) {
+const char * find_char(const char * str, const char c) {
     do {
         if (*str == c)
-            return (char *) str;
+            return str;
         ++str;
     } while (*str != '\0');
     return NULL;
@@ -98,7 +96,7 @@ char * nconcat(char * dst, const char * src, size_t count) {
     return ans;
 }
 
-char * dupeconcat(const char * first, const char * second) {
+char * dupe_concat(const char * first, const char * second) {
     size_t size = len(first) + len(second) + 1;
     char * str = (char *) calloc(size, sizeof(char));
     concat(str, first);
@@ -110,9 +108,9 @@ char * fget(char * str, FILE *stream) {
     if (!stream)
         return NULL;
     char * ans = str;
-    int ch = 0; // ?
+    int ch = 0;
     while ((ch = getc(stream)) != '\n' && ch != EOF) {
-        *str = ch;
+        *str = (char)ch;
         ++str;
     }
     *str = '\0';
@@ -125,7 +123,7 @@ char * fnget(char * str, size_t count, FILE *stream) {
     char * ans = str;
     int ch = 0; // ?
     while (count > 0 && (ch = getc(stream)) != '\n' && ch != EOF) {
-        *str = ch;
+        *str = (char)ch;
         ++str;
         --count;
     }
@@ -141,7 +139,7 @@ char * dupe(const char * str) {
 }
 
 // Нахождение ближайшей степени 2 >= x
-unsigned cpl2(unsigned x) {
+size_t cpl2(size_t x) {
     x = x - 1;
     x = x | (x >> 1);
     x = x | (x >> 2);
@@ -158,7 +156,8 @@ ssize_t getline(char ** ptr, size_t * len, FILE * stream) {
     if (*ptr == NULL){
         printf("*ptr is NULL");
         char * str = (char *) calloc(1, sizeof(char));
-        ptr = &str;
+        if (!str) return -1;
+        *ptr = str;
         *len = 1;
     }
     size_t count = 0;
@@ -169,16 +168,17 @@ ssize_t getline(char ** ptr, size_t * len, FILE * stream) {
         // printf("ch = %c (%d) \t", ch, ch);
         if (ch == EOF) return EOF;
         if (*len - 1 <= count) { // оставляем один символ для \0
-            *len = cpl2(*len+1);
-            char * str = (char *) realloc(*ptr, *len);
-            ptr = &str;
+            *len = cpl2(*len + 1);
+            char * newptr = (char *) realloc(*ptr, *len);
+            if (!newptr) return -1;
+            *ptr = newptr;
         }
         // printf("count = %zu, len = %zu\n", count, *len);
         (*ptr)[count] = (char) ch;
         ++count;
     } while (ch != '\n');
-    (*ptr)[count+1] = '\0'; // Конец строки
-    return count;
+    (*ptr)[count] = '\0'; // Конец строки
+    return (ssize_t)count;
 }
 
 int comp(const char * first, const char * second) {
@@ -362,8 +362,8 @@ const char * find_str(const char * haystack, const char * needle) {
         return NULL;
 
     // Константы для полиномиального хеширования Рабина-Карпа
-    const size_t BASE = 256;  // Основание (размер алфавита)
-    const size_t MOD = 1e9 + 7;  // Простое число для модуля
+    const size_t BASE = 256;              // Основание (размер алфавита)
+    const size_t MOD = 1000000007ULL;     // Простое число для модуля
 
     // Вычисляем хеш для needle
     size_t needle_hash = 0;
@@ -421,13 +421,13 @@ ssize_t count_needle_in_haystack(char * haystack, const size_t haystack_len, con
 
     if (haystack == NULL) {
         errno = EINVAL;
-        ERROR_MSG("U must pass haystack to count needles");
+        // ERROR_MSG("U must pass haystack to count needles");
         return -1;
     }
 
     if (needle == '\0') {
         errno = EINVAL;
-        ERROR_MSG("U must pass needle other than '\\0'");
+        // ERROR_MSG("U must pass needle other than '\\0'");
         return -1;
     }
 
@@ -450,13 +450,13 @@ ssize_t replace_needle_in_haystack
 
     if (haystack == 0) {
         errno = EINVAL;
-        ERROR_MSG("U must pass haystack to count needles");
+        // ERROR_MSG("U must pass haystack to count needles");
         return -1;
     }
 
     if (src == '\0') {
         errno = EINVAL;
-        ERROR_MSG("U must pass src other than '\\0'");
+        // ERROR_MSG("U must pass src other than '\\0'");
         return -1;
     }
 
