@@ -6,6 +6,8 @@
 
 #include <io_utils.h>
 
+#include "stringNthong.h"
+
 namespace mystr {
 
 int put(const char * str) {
@@ -178,7 +180,7 @@ ssize_t getline(char ** ptr, size_t * len, FILE * stream) {
     return count;
 }
 
-int el_comp(const char * first, const char * second) {
+int comp(const char * first, const char * second) {
     do {
         if (*first > *second)
             return 1;
@@ -190,19 +192,24 @@ int el_comp(const char * first, const char * second) {
     return 0;
 }
 
-int comp(const char * first, const char * second) {
-    size_t first_hash = 0;
-    size_t second_hash = 0;
-    while (*first != 0 && *second != 0) {
-        first_hash += *first;
-        second_hash += *second;
+int comp_to(const char *first, const char *second, const char final)
+{
+    while (*first != '\0' && *second != '\0' && *first != final && *second != final) {
+        if (*first != *second) {
+            return (unsigned char)*first - (unsigned char)*second;
+        }
         ++first;
         ++second;
-        if (first_hash == second_hash)
-            continue;
-        return (first_hash - second_hash);
     }
-    return 0;
+
+    // Если цикл завершился значит строки (одна или обе) закончилась или дошла до разделителя
+    if (*first == final || *first == '\0') {
+        if (*second == final || *second == '\0') {
+            return 0; // обе достигли конца/ограничителя
+        }
+        return -1; // first короче
+    }
+    return 1; // second короче
 }
 
 int ncomp(const char * first, const char * second, size_t size) {
@@ -352,24 +359,58 @@ const char * find_str(const char * haystack, const char * needle) {
         return haystack;
     if (len(haystack) < needle_len)
         return NULL;
+
+    // Константы для полиномиального хеширования Рабина-Карпа
+    const size_t BASE = 256;  // Основание (размер алфавита)
+    const size_t MOD = 1e9 + 7;  // Простое число для модуля
+
+    // Вычисляем хеш для needle
     size_t needle_hash = 0;
-    for (int i = 0; i < needle_len; ++i) {
-        needle_hash += needle[i];
+    size_t pow_base = 1;
+    for (size_t i = 0; i < needle_len; ++i) {
+        needle_hash = (needle_hash * BASE + (unsigned char)needle[i]) % MOD;
+        if (i < needle_len - 1) {
+            pow_base = (pow_base * BASE) % MOD;
+        }
     }
-    const char * ans = haystack;
+
+    // Вычисляем начальный rolling hash для первого окна в haystack
     size_t rolling_hash = 0;
-    for (int i = 0; i < needle_len; ++i) {
-        rolling_hash += *ans;
-        ++ans;
+    for (size_t i = 0; i < needle_len; ++i) {
+        rolling_hash = (rolling_hash * BASE + (unsigned char)haystack[i]) % MOD;
     }
-    while (*ans != '\0') {
-        if (rolling_hash == needle_hash && mystr::comp(haystack, needle) == 0)
-            return haystack;
-        rolling_hash += *ans;
-        rolling_hash -= *haystack;
-        ++ans;
-        ++haystack;
+
+    // Проверяем первое окно
+    if (rolling_hash == needle_hash) {
+        bool match = true;
+        for (size_t i = 0; i < needle_len; ++i) {
+            if (haystack[i] != needle[i]) {
+                match = false;
+                break;
+            }
+        }
+        if (match) return haystack;
     }
+
+    // Прокатываем окно по остальной части строки
+    for (size_t i = needle_len; i < len(haystack); ++i) {
+        // Удаляем первый символ из хеша и добавляем новый
+        rolling_hash = (rolling_hash + MOD - ((unsigned char)haystack[i - needle_len] * pow_base) % MOD) % MOD;
+        rolling_hash = (rolling_hash * BASE + (unsigned char)haystack[i]) % MOD;
+
+        // Проверяем совпадение хешей
+        if (rolling_hash == needle_hash) {
+            bool match = true;
+            for (size_t j = 0; j < needle_len; ++j) {
+                if (haystack[i - needle_len + 1 + j] != needle[j]) {
+                    match = false;
+                    break;
+                }
+            }
+            if (match) return &haystack[i - needle_len + 1];
+        }
+    }
+
     return NULL;
 }
 
@@ -431,6 +472,10 @@ ssize_t replace_needle_in_haystack
     return count; // Дошли до haystack_len но не встретили '\0'
 }
 
+int is_not_empty(const char *str) {
+    return str != NULL && str[0] != '\0';
+}
+
 /*
 this algorithm (k=33) was first reported by dan bernstein many years ago in comp.lang.c.
 another version of this algorithm (now favored by bernstein) uses xor:
@@ -442,8 +487,8 @@ unsigned long hash(unsigned char *str) {
     unsigned long hash = 5381;
     int c;
 
-    while (c = *str++)
-        hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
+    while ((c = *str++) != '\0')
+        hash = ((hash << 5) + hash) + (unsigned long long) c; /* hash * 33 + c */
 
     return hash;
 }
@@ -463,8 +508,8 @@ unsigned long sdbm(const char * str) {
     unsigned long hash = 0;
     int c;
 
-    while (c = *str++)
-        hash = c + (hash << 16) + (hash << 6) - hash;
+    while ((c = *str++) != '\0')
+        hash = (unsigned long long) c + (hash << 16) + (hash << 6) - hash;
 
     return hash;
 }

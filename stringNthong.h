@@ -5,67 +5,225 @@
 
 namespace mystr {
 
+/**
+ * @brief Выводит строку посимвольно в stdout
+ * @param str Указатель на строку для вывода
+ * @return 0 при успешном выполнении
+ */
 int put(const char * str);
 
+/**
+ * @brief Ищет первое вхождение символа в строке
+ * @param str Указатель на строку для поиска
+ * @param c Символ для поиска
+ * @return Указатель на найденный символ или NULL если не найден
+ * @note Дублирует функцию strchr() из <string.h>. Рекомендуется использовать стандартную версию.
+ */
 char * find_char(const char * str, const char c);
 
+/**
+ * @brief Вычисляет длину строки
+ * @param str Указатель на строку
+ * @return Длина строки в символах (без учета '\0')
+ * @note Дублирует функцию strlen() из <string.h>. Рекомендуется использовать стандартную версию.
+ */
 size_t len(const char * str);
 
+/**
+ * @brief Копирует строку src в dst
+ * @param dst Указатель на буфер назначения
+ * @param src Указатель на исходную строку
+ * @return Указатель на dst
+ * @note Дублирует функцию strcpy() из <string.h>. Рекомендуется использовать стандартную версию.
+ */
 char * copy(char * dst, const char * src);
 
+/**
+ * @brief Копирует не более count символов из src в dst
+ * @param dst Указатель на буфер назначения
+ * @param src Указатель на исходную строку
+ * @param count Максимальное количество символов для копирования
+ * @return Указатель на dst или NULL если count = 0
+ * @note Дублирует функцию strncpy() из <string.h>. Рекомендуется использовать стандартную версию.
+ */
 char * ncopy(char * dst, const char * src, size_t count);
 
+/**
+ * @brief Присоединяет строку src к концу строки dst
+ * @param dst Указатель на строку назначения
+ * @param src Указатель на присоединяемую строку
+ * @return Указатель на dst
+ * @note Дублирует функцию strcat() из <string.h>. Рекомендуется использовать стандартную версию.
+ */
 char * concat(char * dst, const char * src);
 
+/**
+ * @brief Присоединяет не более count символов из src к концу строки dst
+ * @param dst Указатель на строку назначения
+ * @param src Указатель на присоединяемую строку
+ * @param count Максимальное количество символов для присоединения
+ * @return Указатель на dst или NULL если count = 0
+ * @note Дублирует функцию strncat() из <string.h>. Рекомендуется использовать стандартную версию.
+ */
 char * nconcat(char * dst, const char * src, size_t count);
 
+/**
+ * @brief Создает новую строку путем конкатенации двух строк
+ * @param first Указатель на первую строку
+ * @param second Указатель на вторую строку
+ * @return Указатель на новую выделенную строку (требует освобождения памяти)
+ */
 char * dupeconcat(const char * first, const char * second);
 
+/**
+ * @brief Читает строку из файлового потока до символа новой строки
+ * @param str Указатель на буфер для чтения строки
+ * @param stream Файловый поток для чтения
+ * @return Указатель на str или NULL при ошибке
+ * @note Похожа на функцию fgets() из <stdio.h>, но без ограничения размера буфера.
+ *       Рекомендуется использовать стандартную fgets() с проверкой размера буфера.
+ */
 char * fget(char * str, FILE *stream);
 
+/**
+ * @brief Читает не более count символов из файлового потока до символа новой строки
+ * @param str Указатель на буфер для чтения строки
+ * @param count Максимальное количество символов для чтения
+ * @param stream Файловый поток для чтения
+ * @return Указатель на str или NULL при ошибке
+ * @note Дублирует функцию fgets() из <stdio.h>. Рекомендуется использовать стандартную версию.
+ */
 char * fnget(char * str, size_t count, FILE *stream);
 
+/**
+ * @brief Создает дубликат строки в динамической памяти
+ * @param str Указатель на исходную строку
+ * @return Указатель на новую выделенную строку (требует освобождения памяти)
+ * @note Дублирует функцию strdup() из <string.h>. Рекомендуется использовать стандартную версию.
+ */
 char * dupe(const char * str);
 
-size_t getline(char ** ptr, size_t * len, FILE * stream);
+/**
+ * @brief Читает строку переменной длины из файлового потока с автоматическим выделением памяти
+ * @param ptr Указатель на указатель буфера (может быть перевыделен)
+ * @param len Указатель на размер буфера (может быть изменен)
+ * @param stream Файловый поток для чтения
+ * @return Количество прочитанных символов или -1 при ошибке/EOF
+ * @note Дублирует функцию getline() из <stdio.h> (POSIX). Рекомендуется использовать стандартную версию.
+ */
+ssize_t getline(char ** ptr, size_t * len, FILE * stream);
 
-int el_comp(const char * first, const char * second);
-
+/**
+ * @brief Поэлементно сравнивает две строки лексикографически
+ * @param first Указатель на первую строку
+ * @param second Указатель на вторую строку
+ * @return 1 если first > second, -1 если first < second, 0 если равны
+ * @note Дублирует функцию strcmp() из <string.h>. Рекомендуется использовать стандартную версию.
+ */
 int comp(const char * first, const char * second);
 
+/**
+ * @brief Сравнивает строки до определенного символа с помощью хэш-функции
+ * @param first Указатель на первую строку
+ * @param second Указатель на вторую строку
+ * @param final Символ, до которого производится сравнение
+ * @return Разность хэшей строк до символа final
+ */
+int comp_to(const char * first, const char * second, const char final);
+
+/**
+ * @brief Поэлементно сравнивает не более size символов двух строк
+ * @param first Указатель на первую строку
+ * @param second Указатель на вторую строку
+ * @param size Максимальное количество символов для сравнения
+ * @return 1 если first > second, -1 если first < second, 0 если равны
+ * @note Дублирует функцию strncmp() из <string.h>. Рекомендуется использовать стандартную версию.
+ */
 int ncomp(const char * first, const char * second, size_t size);
 
+/**
+ * @brief Возвращает текстовое описание кода ошибки
+ * @param errcode Код ошибки (errno)
+ * @return Указатель на строку с описанием ошибки
+ * @note Дублирует функцию strerror() из <string.h>. Рекомендуется использовать стандартную версию.
+ */
 const char * err(int errcode);
 
+/**
+ * @brief Создает новую строку путем повторения исходной строки count раз
+ * @param src Указатель на исходную строку
+ * @param count Количество повторений
+ * @return Указатель на новую выделенную строку (требует освобождения памяти)
+ */
 char * mult(const char * src, size_t count);
 
-char * find_str(const char * haystack, const char * needle);
+/**
+ * @brief Ищет подстроку в строке используя rolling hash алгоритм
+ * @param haystack Указатель на строку для поиска
+ * @param needle Указатель на искомую подстроку
+ * @return Указатель на найденную подстроку или NULL если не найдена
+ * @note Дублирует функцию strstr() из <string.h>. Рекомендуется использовать стандартную версию.
+ */
+const char * find_str(const char * haystack, const char * needle);
 
+/**
+ * @brief Подсчитывает количество вхождений символа в строке ограниченной длины
+ * @param haystack Указатель на строку для поиска
+ * @param haystack_len Длина строки haystack
+ * @param needle Искомый символ
+ * @return Количество найденных символов или -1 при ошибке
+ */
 ssize_t count_needle_in_haystack(char * haystack, const size_t haystack_len, const char needle);
 
+/**
+ * @brief Заменяет все вхождения символа src на символ dst в строке ограниченной длины
+ * @param haystack Указатель на строку для замены
+ * @param haystack_len Длина строки haystack
+ * @param src Заменяемый символ
+ * @param dst Символ для замены
+ * @return Количество замененных символов или -1 при ошибке
+ */
 ssize_t replace_needle_in_haystack
     (char * haystack, const size_t haystack_len, const char src, const char dst);
 
-/*
-this algorithm (k=33) was first reported by dan bernstein many years ago in comp.lang.c.
-another version of this algorithm (now favored by bernstein) uses xor:
-hash(i) = hash(i - 1) * 33 ^ str[i];
-the magic of number 33 (why it works better than many other constants, prime or not)
-has never been adequately explained.
-*/
+/**
+ * @brief Проверяет, что строка не является NULL и не пустой
+ * @param str Указатель на строку для проверки
+ * @return Ненулевое значение если строка не пустая, 0 если пустая или NULL
+ */
+int is_not_empty(const char *str);
+
+/**
+ * @brief Вычисляет хэш строки по алгоритму djb2 (Dan Bernstein)
+ *
+ * Данный алгоритм (k=33) был впервые описан Дэном Бернстейном в comp.lang.c.
+ * Другая версия этого алгоритма (предпочитаемая Бернстейном) использует XOR:
+ * hash(i) = hash(i - 1) * 33 ^ str[i];
+ * Магия числа 33 (почему оно работает лучше многих других констант)
+ * так и не была должным образом объяснена.
+ *
+ * @param str Указатель на строку для хэширования
+ * @return Хэш-значение строки
+ */
 unsigned long hash(unsigned char *str);
 
-/*
-this algorithm was created for sdbm (a public-domain reimplementation of ndbm) database library.
-it was found to do well in scrambling bits, causing better distribution of the keys and fewer splits.
-it also happens to be a good general hashing function with good distribution.
-the actual function is hash(i) = hash(i - 1) * 65599 + str[i];
-what is included below is the faster version used in gawk.
-[there is even a faster, duff-device version]
-the magic prime constant 65599 (2^6 + 2^16 - 1) was picked out of thin air
-while experimenting with many different constants. this is one of the algorithms
-used in berkeley db (see sleepycat) and elsewhere.
-*/
+/**
+ * @brief Вычисляет хэш строки по алгоритму sdbm
+ *
+ * Данный алгоритм был создан для библиотеки базы данных sdbm
+ * (публично доступная реимплементация ndbm).
+ * Было обнаружено, что он хорошо перемешивает биты, обеспечивая лучшее
+ * распределение ключей и меньшее количество коллизий.
+ * Это также хорошая универсальная хэш-функция с хорошим распределением.
+ * Фактическая функция: hash(i) = hash(i - 1) * 65599 + str[i];
+ * Ниже представлена более быстрая версия, используемая в gawk.
+ * Магическая простая константа 65599 (2^6 + 2^16 - 1) была выбрана
+ * экспериментально среди множества различных констант.
+ * Это один из алгоритмов, используемых в Berkeley DB и других местах.
+ *
+ * @param str Указатель на строку для хэширования
+ * @return Хэш-значение строки
+ */
 unsigned long sdbm(const char * str);
 
 }
