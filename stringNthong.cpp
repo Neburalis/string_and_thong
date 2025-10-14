@@ -182,15 +182,15 @@ ssize_t getline(char ** ptr, size_t * len, FILE * stream) {
 }
 
 int comp(const char * first, const char * second) {
-    do {
-        if (*first > *second)
-            return 1;
-        else if (*first < *second)
-            return -1;
-        ++first;
-        ++second;
-    } while (*first != '\0' && *second != '\0');
-    return 0;
+    const unsigned char *s1 = (const unsigned char *)first;
+    const unsigned char *s2 = (const unsigned char *)second;
+    while (*s1 == *s2) {
+        if (*s1 == '\0')
+            return 0;
+        ++s1;
+        ++s2;
+    }
+    return (int)(*s1) - (int)(*s2);
 }
 
 int comp_to(const char *first, const char *second, const char final)

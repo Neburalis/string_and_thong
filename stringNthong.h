@@ -117,17 +117,17 @@ ssize_t getline(char ** ptr, size_t * len, FILE * stream);
  * @brief Поэлементно сравнивает две строки лексикографически
  * @param first Указатель на первую строку
  * @param second Указатель на вторую строку
- * @return 1 если first > second, -1 если first < second, 0 если равны
+ * @return положительное значение если first > second, отрицательное значение если first < second, 0 если равны
  * @note Дублирует функцию strcmp() из <string.h>. Рекомендуется использовать стандартную версию.
  */
 int comp(const char * first, const char * second);
 
 /**
- * @brief Сравнивает строки до определенного символа с помощью хэш-функции
+ * @brief Сравнивает две строки лексикографически до указанного символа-границы (сравниваются подстроки до первого включения символа-границы)
  * @param first Указатель на первую строку
  * @param second Указатель на вторую строку
  * @param final Символ, до которого производится сравнение
- * @return Разность хэшей строк до символа final
+ * @return положительное значение если first > second, отрицательное значение если first < second, 0 если равны
  */
 int comp_to(const char * first, const char * second, const char final);
 
