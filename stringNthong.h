@@ -186,6 +186,8 @@ ssize_t count_needle_in_haystack(char * haystack, const size_t haystack_len, con
 ssize_t replace_needle_in_haystack
     (char * haystack, const size_t haystack_len, const char src, const char dst);
 
+void move_ptr_to_first_not_alpha_symbol(char ** ptr, int backword);
+
 /**
  * @brief Проверяет, что строка не является NULL и не пустой
  * @param str Указатель на строку для проверки
