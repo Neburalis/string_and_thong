@@ -139,7 +139,7 @@ char * dupe(const char * str) {
 }
 
 // Нахождение ближайшей степени 2 >= x
-size_t cpl2(size_t x) {
+static size_t cpl2(size_t x) {
     x = x - 1;
     x = x | (x >> 1);
     x = x | (x >> 2);
