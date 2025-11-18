@@ -5,6 +5,21 @@
 
 namespace mystr {
 
+typedef struct {
+    char            *str;
+    u_int64_t       len;
+    unsigned long   hash;
+
+    bool is_same(mystr_t *second) {
+        if (hash != second->hash)
+            return false;
+        else
+            return strcmp(str, second->str) == 0;
+    }
+} mystr_t;
+
+mystr_t construct(char * str);
+
 /**
  * @brief Выводит строку посимвольно в stdout
  * @param str Указатель на строку для вывода
@@ -255,6 +270,8 @@ unsigned long hash(unsigned char *str);
  *
  * @param str Указатель на строку для хэширования
  * @return Хэш-значение строки
+ *
+ * @details Значение 0 принято как poison и никакой хеш не может его иметь
  */
 unsigned long sdbm(const char * str);
 

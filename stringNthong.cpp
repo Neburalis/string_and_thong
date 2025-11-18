@@ -9,6 +9,17 @@
 
 namespace mystr {
 
+mystr_t construct(char * str) {
+    if (str = NULL)
+        return mystr_t {};
+    return mystr_t {
+        .str  = str,
+        .len  = strlen(str),
+        .hash = sdbm(str),
+    };
+}
+
+
 int put(const char * str) {
     while (*str != '\0') {
         putchar(*str);
@@ -536,7 +547,7 @@ unsigned long sdbm(const char * str) {
     while ((c = *str++) != '\0')
         hash = (unsigned long long) c + (hash << 16) + (hash << 6) - hash;
 
-    return hash;
+    return hash != 0 ? hash : 1;
 }
 
 }
