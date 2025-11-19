@@ -2,30 +2,39 @@
 #define THRONG_H
 
 #include <stdio.h>
+#include <string.h>
+#include <sys/types.h>
 
 namespace mystr {
 
-typedef struct {
+typedef struct mystr_t {
     char            *str;
     u_int64_t       len;
     unsigned long   hash;
 
-    bool is_same(mystr_t *second) {
-        if (hash != second->hash)
-            return false;
-        else
-            return strcmp(str, second->str) == 0;
+    /**
+     * @brief Сравнивает текущий объект с другим экземпляром mystr_t
+     * @param second Указатель на второй объект mystr_t
+     * @return true если строки идентичны, false иначе
+     */
+    bool is_same(const mystr_t *second) {
+        return second && str && second->str && hash == second->hash && strcmp(str, second->str) == 0;
     }
 } mystr_t;
 
-mystr_t construct(char * str);
+/**
+ * @brief Создаёт структуру mystr_t на основе переданной C-строки
+ * @param str Указатель на строку, чья память управляется вызывающей стороной
+ * @return Инициализированная структура mystr_t или пустая, если str == NULL
+ */
+mystr_t construct(char *str);
 
 /**
  * @brief Выводит строку посимвольно в stdout
  * @param str Указатель на строку для вывода
  * @return 0 при успешном выполнении
  */
-int put(const char * str);
+int put(const mystr_t *str);
 
 /**
  * @brief Ищет первое вхождение символа в строке
@@ -34,7 +43,39 @@ int put(const char * str);
  * @return Указатель на найденный символ или NULL если не найден
  * @note Дублирует функцию strchr() из <string.h>. Рекомендуется использовать стандартную версию.
  */
-const char * find_char(const char * str, const char c);
+const char * find_char(const mystr_t *str, char c);
+
+/**
+ * @brief Ищет последнее вхождение символа в строке
+ * @param str Указатель на строку
+ * @param c Символ для поиска
+ * @return Указатель на найденный символ или NULL, если символ отсутствует
+ */
+const char * find_last_char(const mystr_t *str, char c);
+
+/**
+ * @brief Ищет первое вхождение любого символа из accept
+ * @param str Указатель на строку для поиска
+ * @param accept Набор символов, которые требуется найти
+ * @return Указатель на найденный символ или NULL, если совпадений нет
+ */
+const char * find_any(const mystr_t *str, const mystr_t *accept);
+
+/**
+ * @brief Подсчитывает длину начального сегмента str, содержащего только символы из accept
+ * @param str Указатель на строку
+ * @param accept Набор допустимых символов
+ * @return Длина сегмента
+ */
+size_t span(const mystr_t *str, const mystr_t *accept);
+
+/**
+ * @brief Подсчитывает длину начального сегмента str, НЕ содержащего символы из reject
+ * @param str Указатель на строку
+ * @param reject Набор запрещённых символов
+ * @return Длина сегмента
+ */
+size_t cspan(const mystr_t *str, const mystr_t *reject);
 
 /**
  * @brief Вычисляет длину строки
@@ -42,7 +83,7 @@ const char * find_char(const char * str, const char c);
  * @return Длина строки в символах (без учета '\0')
  * @note Дублирует функцию strlen() из <string.h>. Рекомендуется использовать стандартную версию.
  */
-size_t len(const char * str);
+size_t len(const mystr_t *str);
 
 /**
  * @brief Копирует строку src в dst
@@ -51,7 +92,7 @@ size_t len(const char * str);
  * @return Указатель на dst
  * @note Дублирует функцию strcpy() из <string.h>. Рекомендуется использовать стандартную версию.
  */
-char * copy(char * dst, const char * src);
+mystr_t * copy(mystr_t *dst, const mystr_t *src);
 
 /**
  * @brief Копирует не более count символов из src в dst
@@ -61,7 +102,7 @@ char * copy(char * dst, const char * src);
  * @return Указатель на dst или NULL если count = 0
  * @note Дублирует функцию strncpy() из <string.h>. Рекомендуется использовать стандартную версию.
  */
-char * ncopy(char * dst, const char * src, size_t count);
+mystr_t * ncopy(mystr_t *dst, const mystr_t *src, size_t count);
 
 /**
  * @brief Присоединяет строку src к концу строки dst
@@ -70,7 +111,7 @@ char * ncopy(char * dst, const char * src, size_t count);
  * @return Указатель на dst
  * @note Дублирует функцию strcat() из <string.h>. Рекомендуется использовать стандартную версию.
  */
-char * concat(char * dst, const char * src);
+mystr_t * concat(mystr_t *dst, const mystr_t *src);
 
 /**
  * @brief Присоединяет не более count символов из src к концу строки dst
@@ -80,7 +121,7 @@ char * concat(char * dst, const char * src);
  * @return Указатель на dst или NULL если count = 0
  * @note Дублирует функцию strncat() из <string.h>. Рекомендуется использовать стандартную версию.
  */
-char * nconcat(char * dst, const char * src, size_t count);
+mystr_t * nconcat(mystr_t *dst, const mystr_t *src, size_t count);
 
 /**
  * @brief Создает новую строку путем конкатенации двух строк
@@ -88,7 +129,7 @@ char * nconcat(char * dst, const char * src, size_t count);
  * @param second Указатель на вторую строку
  * @return Указатель на новую выделенную строку (требует освобождения памяти)
  */
-char * dupe_concat(const char * first, const char * second);
+mystr_t dupe_concat(const mystr_t *first, const mystr_t *second);
 
 /**
  * @brief Читает строку из файлового потока до символа новой строки
@@ -98,7 +139,7 @@ char * dupe_concat(const char * first, const char * second);
  * @note Похожа на функцию fgets() из <stdio.h>, но без ограничения размера буфера.
  *       Рекомендуется использовать стандартную fgets() с проверкой размера буфера.
  */
-char * fget(char * str, FILE *stream);
+mystr_t * fget(mystr_t *str, FILE *stream);
 
 /**
  * @brief Читает не более count символов из файлового потока до символа новой строки
@@ -108,7 +149,7 @@ char * fget(char * str, FILE *stream);
  * @return Указатель на str или NULL при ошибке
  * @note Дублирует функцию fgets() из <stdio.h>. Рекомендуется использовать стандартную версию.
  */
-char * fnget(char * str, size_t count, FILE *stream);
+mystr_t * fnget(mystr_t *str, size_t count, FILE *stream);
 
 /**
  * @brief Создает дубликат строки в динамической памяти
@@ -116,7 +157,7 @@ char * fnget(char * str, size_t count, FILE *stream);
  * @return Указатель на новую выделенную строку (требует освобождения памяти)
  * @note Дублирует функцию strdup() из <string.h>. Рекомендуется использовать стандартную версию.
  */
-char * dupe(const char * str);
+mystr_t dupe(const mystr_t *str);
 
 /**
  * @brief Читает строку переменной длины из файлового потока с автоматическим выделением памяти
@@ -126,7 +167,7 @@ char * dupe(const char * str);
  * @return Количество прочитанных символов или -1 при ошибке/EOF
  * @note Дублирует функцию getline() из <stdio.h> (POSIX). Рекомендуется использовать стандартную версию.
  */
-ssize_t getline(char ** ptr, size_t * len, FILE * stream);
+ssize_t getline(mystr_t *line, FILE *stream);
 
 /**
  * @brief Поэлементно сравнивает две строки лексикографически
@@ -135,7 +176,7 @@ ssize_t getline(char ** ptr, size_t * len, FILE * stream);
  * @return положительное значение если first > second, отрицательное значение если first < second, 0 если равны
  * @note Дублирует функцию strcmp() из <string.h>. Рекомендуется использовать стандартную версию.
  */
-int comp(const char * first, const char * second);
+int comp(const mystr_t *first, const mystr_t *second);
 
 /**
  * @brief Сравнивает две строки лексикографически до указанного символа-границы (сравниваются подстроки до первого включения символа-границы)
@@ -144,7 +185,7 @@ int comp(const char * first, const char * second);
  * @param final Символ, до которого производится сравнение
  * @return положительное значение если first > second, отрицательное значение если first < second, 0 если равны
  */
-int comp_to(const char * first, const char * second, const char final);
+int comp_to(const mystr_t *first, const mystr_t *second, char final);
 
 /**
  * @brief Поэлементно сравнивает не более size символов двух строк
@@ -154,15 +195,7 @@ int comp_to(const char * first, const char * second, const char final);
  * @return 1 если first > second, -1 если first < second, 0 если равны
  * @note Дублирует функцию strncmp() из <string.h>. Рекомендуется использовать стандартную версию.
  */
-int ncomp(const char * first, const char * second, size_t size);
-
-/**
- * @brief Возвращает текстовое описание кода ошибки
- * @param errcode Код ошибки (errno)
- * @return Указатель на строку с описанием ошибки
- * @note Дублирует функцию strerror() из <string.h>. Рекомендуется использовать стандартную версию.
- */
-const char * err(int errcode);
+int ncomp(const mystr_t *first, const mystr_t *second, size_t size);
 
 /**
  * @brief Создает новую строку путем повторения исходной строки count раз
@@ -170,7 +203,7 @@ const char * err(int errcode);
  * @param count Количество повторений
  * @return Указатель на новую выделенную строку (требует освобождения памяти)
  */
-char * mult(const char * src, size_t count);
+mystr_t mult(const mystr_t *src, size_t count);
 
 /**
  * @brief Ищет подстроку в строке используя rolling hash алгоритм
@@ -179,7 +212,7 @@ char * mult(const char * src, size_t count);
  * @return Указатель на найденную подстроку или NULL если не найдена
  * @note Дублирует функцию strstr() из <string.h>. Рекомендуется использовать стандартную версию.
  */
-const char * find_str(const char * haystack, const char * needle);
+const char * find_str(const mystr_t *haystack, const mystr_t *needle);
 
 /**
  * @brief Подсчитывает количество вхождений символа в строке ограниченной длины
@@ -188,7 +221,7 @@ const char * find_str(const char * haystack, const char * needle);
  * @param needle Искомый символ
  * @return Количество найденных символов или -1 при ошибке
  */
-ssize_t count_needle_in_haystack(char * haystack, const size_t haystack_len, const char needle);
+ssize_t count_needle_in_haystack(const mystr_t *haystack, char needle);
 
 /**
  * @brief Заменяет все вхождения символа src на символ dst в строке ограниченной длины
@@ -198,8 +231,7 @@ ssize_t count_needle_in_haystack(char * haystack, const size_t haystack_len, con
  * @param dst Символ для замены
  * @return Количество замененных символов или -1 при ошибке
  */
-ssize_t replace_needle_in_haystack
-    (char * haystack, const size_t haystack_len, const char src, const char dst);
+ssize_t replace_needle_in_haystack(mystr_t *haystack, char src, char dst);
 
 /**
  * @brief Перемещает указатель к ближайшему алфавитному символу относительно текущей позиции
@@ -215,7 +247,7 @@ ssize_t replace_needle_in_haystack
  *       внутри одной нуль-терминированной строки; выход за её границы приводит к
  *       неопределённому поведению.
  */
-void move_ptr_to_first_alpha_symbol(char ** ptr, int backword);
+size_t move_ptr_to_first_alpha_symbol(const mystr_t *str, size_t start, int backword);
 
 /**
  * @brief Перемещает указатель к ближайшему символу, отличному от пробельного, относительно текущей позиции
@@ -231,14 +263,14 @@ void move_ptr_to_first_alpha_symbol(char ** ptr, int backword);
  *       внутри одной нуль-терминированной строки; выход за её границы приводит к
  *       неопределённому поведению.
  */
-void move_ptr_to_first_not_space_symbol(char ** ptr, int backword);
+size_t move_ptr_to_first_not_space_symbol(const mystr_t *str, size_t start, int backword);
 
 /**
  * @brief Проверяет, что строка не является NULL и не пустой
  * @param str Указатель на строку для проверки
  * @return Ненулевое значение если строка не пустая, 0 если пустая или NULL
  */
-int is_not_empty(const char *str);
+int is_not_empty(const mystr_t *str);
 
 /**
  * @brief Вычисляет хэш строки по алгоритму djb2 (Dan Bernstein)
@@ -252,7 +284,7 @@ int is_not_empty(const char *str);
  * @param str Указатель на строку для хэширования
  * @return Хэш-значение строки
  */
-unsigned long hash(unsigned char *str);
+unsigned long djb2(const mystr_t *str);
 
 /**
  * @brief Вычисляет хэш строки по алгоритму sdbm
@@ -273,8 +305,8 @@ unsigned long hash(unsigned char *str);
  *
  * @details Значение 0 принято как poison и никакой хеш не может его иметь
  */
-unsigned long sdbm(const char * str);
+unsigned long sdbm(const mystr_t *str);
 
 }
 
-#endif
+#endif // THRONG_H

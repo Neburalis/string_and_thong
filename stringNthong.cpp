@@ -1,553 +1,279 @@
-#include <assert.h>
-#include <ctype.h>
-#include <errno.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 #include "stringNthong.h"
+#include <ctype.h>
+#include <stdlib.h>
+#include <sys/types.h>
 
 namespace mystr {
 
-mystr_t construct(char * str) {
-    if (str = NULL)
-        return mystr_t {};
-    return mystr_t {
-        .str  = str,
-        .len  = strlen(str),
-        .hash = sdbm(str),
-    };
+static size_t actual_len(const mystr_t *s) { return s && s->str ? (s->len ? s->len : strlen(s->str)) : 0; }
+
+static unsigned long djb2_impl(const char *s) {
+    unsigned long h = 5381;
+    if (!s) return 0;
+    for (unsigned char c; (c = static_cast<unsigned char>(*s++));) h = ((h << 5) + h) + c;
+    return h;
+}
+static unsigned long hash_sdbm_impl(const char *s) {
+    unsigned long h = 0;
+    if (!s) return 1;
+    for (unsigned char c; (c = static_cast<unsigned char>(*s++));) h = c + (h << 6) + (h << 16) - h;
+    return h ? h : 1;
 }
 
-
-int put(const char * str) {
-    while (*str != '\0') {
-        putchar(*str);
-        ++str;
-    }
-    return 0;
+mystr_t construct(char *str) {
+    mystr_t res {str, 0, 0};
+    if (!str) return res;
+    res.len = strlen(str);
+    res.hash = djb2(&res);
+    return res;
 }
 
-const char * find_char(const char * str, const char c) {
-    do {
-        if (*str == c)
-            return str;
-        ++str;
-    } while (*str != '\0');
-    return NULL;
+int put(const mystr_t *str) {
+    if (!str || !str->str) return -1;
+    return fputs(str->str, stdout) >= 0 ? 0 : -1;
 }
 
-size_t len(const char * str) {
-    size_t counter = 0;
-    while (*str != '\0') {
-        ++counter;
-        ++str;
-    }
-    return counter;
+const char * find_char(const mystr_t *str, char c) { 
+    return str && str->str ? strchr(str->str, c) : nullptr; 
 }
 
-char * copy(char * dst, const char * src) {
-    char * ans = dst;
-    while (*src != '\0') {
-        *dst = *src;
-        ++src;
-        ++dst;
-    }
-    *dst = '\0';
-    return ans;
+const char * find_last_char(const mystr_t *str, char c) { 
+    return str && str->str ? strrchr(str->str, c) : nullptr; 
 }
 
-char * ncopy(char * dst, const char * src, size_t count) {
-    char * ans = dst;
-    if (count == 0)
-        return NULL;
-    while (*src != '\0' && count > 0) {
-        *dst = *src;
-        ++src;
-        ++dst;
-        --count;
-    }
-    *dst = '\0';
-    while (count > 0) {
-        *dst = '\0';
-        ++dst;
-        --count;
-    }
-    return ans;
+const char * find_any(const mystr_t *str, const mystr_t *accept) {
+    return str && str->str && accept && accept->str ? strpbrk(str->str, accept->str) : nullptr;
 }
 
-char * concat(char * dst, const char * src) {
-    char * ans = dst;
-    while (*dst != '\0')
-        ++dst;
-    while (*src != '\0') {
-        *dst = *src;
-        ++src;
-        ++dst;
-    }
-    *dst = '\0';
-    return ans;
+size_t span(const mystr_t *str, const mystr_t *accept) {
+    return str && str->str && accept && accept->str ? strspn(str->str, accept->str) : 0;
 }
 
-char * nconcat(char * dst, const char * src, size_t count) {
-    char * ans = dst;
-    if (count == 0)
-        return NULL;
-    while (*dst != '\0' && count > 0) {
-        ++dst;
-        --count;
-    }
-    while (*src != '\0' && count > 0) {
-        *dst = *src;
-        ++src;
-        ++dst;
-        --count;
-    }
-    *dst = '\0';
-    return ans;
+size_t cspan(const mystr_t *str, const mystr_t *reject) {
+    return str && str->str && reject && reject->str ? strcspn(str->str, reject->str) : 0;
 }
 
-char * dupe_concat(const char * first, const char * second) {
-    size_t size = len(first) + len(second) + 1;
-    char * str = (char *) calloc(size, sizeof(char));
-    concat(str, first);
-    concat(str, second);
+size_t len(const mystr_t *str) { return actual_len(str); }
+
+mystr_t * copy(mystr_t *dst, const mystr_t *src) {
+    if (!dst || !src || !dst->str || !src->str) return nullptr;
+    strcpy(dst->str, src->str);
+    dst->len = actual_len(src);
+    dst->hash = djb2(dst);
+    return dst;
+}
+
+mystr_t * ncopy(mystr_t *dst, const mystr_t *src, size_t count) {
+    if (!count || !dst || !src || !dst->str || !src->str) return nullptr;
+    strncpy(dst->str, src->str, count);
+    size_t written = strnlen(src->str, count);
+    if (written < count) dst->str[written] = '\0';
+    dst->len = written;
+    dst->hash = djb2(dst);
+    return dst;
+}
+
+mystr_t * concat(mystr_t *dst, const mystr_t *src) {
+    if (!dst || !src || !dst->str || !src->str) return nullptr;
+    size_t l1 = actual_len(dst), l2 = actual_len(src);
+    strcat(dst->str, src->str);
+    dst->len = l1 + l2;
+    dst->hash = djb2(dst);
+    return dst;
+}
+
+mystr_t * nconcat(mystr_t *dst, const mystr_t *src, size_t count) {
+    if (!count || !dst || !src || !dst->str || !src->str) return nullptr;
+    strncat(dst->str, src->str, count);
+    dst->len = strlen(dst->str);
+    dst->hash = djb2(dst);
+    return dst;
+}
+
+mystr_t dupe_concat(const mystr_t *first, const mystr_t *second) {
+    size_t l1 = actual_len(first), l2 = actual_len(second);
+    char *buf = (char *)(malloc(l1 + l2 + 1));
+    if (!buf) return {nullptr, 0, 0};
+    if (first && first->str) memcpy(buf, first->str, l1);
+    if (second && second->str) memcpy(buf + l1, second->str, l2);
+    buf[l1 + l2] = '\0';
+    mystr_t out{buf, l1 + l2, 0};
+    out.hash = djb2(&out);
+    return out;
+}
+
+static mystr_t * read_line(mystr_t *str, FILE *stream, ssize_t limit) {
+    if (!str || !stream) return nullptr;
+    size_t cap = str->str ? actual_len(str) + 1 : 64;
+    if (!cap) cap = 64;
+    char *buf = str->str ? str->str : (char *)(malloc(cap));
+    if (!buf) return nullptr;
+    size_t i = 0;
+    int ch;
+    while ((ch = fgetc(stream)) != EOF) {
+        if (limit >= 0 && static_cast<ssize_t>(i) >= limit) break;
+        if (i + 1 >= cap) {
+            cap <<= 1;
+            char *tmp = (char *)(realloc(buf, cap));
+            if (!tmp) {
+                if (!str->str) free(buf);
+                return nullptr;
+            }
+            buf = tmp;
+        }
+        buf[i++] = static_cast<char>(ch);
+        if (ch == '\n') break;
+    }
+    if (ch == EOF && i == 0) {
+        if (!str->str) free(buf);
+        return nullptr;
+    }
+    buf[i] = '\0';
+    str->str = buf;
+    str->len = i;
+    str->hash = djb2(str);
     return str;
 }
 
-char * fget(char * str, FILE *stream) {
-    if (!stream)
-        return NULL;
-    char * ans = str;
-    int ch = 0;
-    while ((ch = getc(stream)) != '\n' && ch != EOF) {
-        *str = (char)ch;
-        ++str;
-    }
-    *str = '\0';
-    return ans;
+mystr_t * fget(mystr_t *str, FILE *stream) { 
+    return read_line(str, stream, -1); 
 }
 
-char * fnget(char * str, size_t count, FILE *stream) {
-    if (!stream)
-        return NULL;
-    char * ans = str;
-    int ch = 0; // ?
-    while (count > 0 && (ch = getc(stream)) != '\n' && ch != EOF) {
-        *str = (char)ch;
-        ++str;
-        --count;
-    }
-    *str = '\0';
-    return ans;
+mystr_t * fnget(mystr_t *str, size_t count, FILE *stream) {
+    if (!count) return nullptr;
+    ssize_t limit = static_cast<ssize_t>(count);
+    return read_line(str, stream, limit - 1);
 }
 
-char * dupe(const char * str) {
-    size_t str_len = len(str) + 1; // Чтобы поместился \0
-    char * ans = (char *) calloc(str_len, sizeof(char));
-    ncopy(ans, str, str_len);
-    return ans;
+mystr_t dupe(const mystr_t *str) {
+    if (!str || !str->str) return {nullptr, 0, 0};
+    char *copy_str = strdup(str->str);
+    if (!copy_str) return {nullptr, 0, 0};
+    mystr_t out{copy_str, actual_len(str), 0};
+    out.hash = djb2(&out);
+    return out;
 }
 
-// Нахождение ближайшей степени 2 >= x
-static size_t cpl2(size_t x) {
-    x = x - 1;
-    x = x | (x >> 1);
-    x = x | (x >> 2);
-    x = x | (x >> 4);
-    x = x | (x >> 8);
-    x = x | (x >> 16);
-    return x+1;
+ssize_t getline(mystr_t *line, FILE *stream) {
+    if (!read_line(line, stream, -1)) return -1;
+    return static_cast<ssize_t>(line->len);
 }
 
-ssize_t getline(char ** ptr, size_t * len, FILE * stream) {
-    if (stream == NULL) {
-        return -1;
-    }
-    if (*ptr == NULL){
-        printf("*ptr is NULL");
-        char * str = (char *) calloc(1, sizeof(char));
-        if (!str) return -1;
-        *ptr = str;
-        *len = 1;
-    }
-    size_t count = 0;
-    int ch = 0;
-    printf("*len = %zu\n", *len);
-    do {
-        ch = getc(stream);
-        // printf("ch = %c (%d) \t", ch, ch);
-        if (ch == EOF) return EOF;
-        if (*len - 1 <= count) { // оставляем один символ для \0
-            *len = cpl2(*len + 1);
-            char * newptr = (char *) realloc(*ptr, *len);
-            if (!newptr) return -1;
-            *ptr = newptr;
-        }
-        // printf("count = %zu, len = %zu\n", count, *len);
-        (*ptr)[count] = (char) ch;
-        ++count;
-    } while (ch != '\n');
-    (*ptr)[count] = '\0'; // Конец строки
-    return (ssize_t)count;
+int comp(const mystr_t *first, const mystr_t *second) {
+    if (!first || !second || !first->str || !second->str) return 0;
+    return strcmp(first->str, second->str);
 }
 
-int comp(const char * first, const char * second) {
-    const unsigned char *s1 = (const unsigned char *)first;
-    const unsigned char *s2 = (const unsigned char *)second;
-    while (*s1 == *s2) {
-        if (*s1 == '\0')
-            return 0;
-        ++s1;
-        ++s2;
-    }
-    return (int)(*s1) - (int)(*s2);
+int comp_to(const mystr_t *first, const mystr_t *second, char final) {
+    if (!first || !second || !first->str || !second->str) return 0;
+    const char *end1 = strchr(first->str, final);
+    const char *end2 = strchr(second->str, final);
+    size_t l1 = end1 ? static_cast<size_t>(end1 - first->str + 1) : actual_len(first);
+    size_t l2 = end2 ? static_cast<size_t>(end2 - second->str + 1) : actual_len(second);
+    size_t min_len = l1 < l2 ? l1 : l2;
+    int res = strncmp(first->str, second->str, min_len);
+    if (res) return res;
+    if (l1 == l2) return 0;
+    return l1 < l2 ? -1 : 1;
 }
 
-int comp_to(const char *first, const char *second, const char final)
-{
-    while (*first != '\0' && *second != '\0' && *first != final && *second != final) {
-        if (*first != *second) {
-            return (unsigned char)*first - (unsigned char)*second;
-        }
-        ++first;
-        ++second;
-    }
-
-    // Если цикл завершился значит строки (одна или обе) закончилась или дошла до разделителя
-    if (*first == final || *first == '\0') {
-        if (*second == final || *second == '\0') {
-            return 0; // обе достигли конца/ограничителя
-        }
-        return -1; // first короче
-    }
-    return 1; // second короче
+int ncomp(const mystr_t *first, const mystr_t *second, size_t size) {
+    if (!first || !second || !first->str || !second->str) return 0;
+    int res = strncmp(first->str, second->str, size);
+    return res ? (res > 0 ? 1 : -1) : 0;
 }
 
-int ncomp(const char * first, const char * second, size_t size) {
-    if (size == 0) {
-        return 0;
-    }
-    do {
-        if (*first > *second)
-            return 1;
-        else if (*first < *second)
-            return -1;
-        ++first;
-        ++second;
-        --size;
-    } while (size > 0 && *first != '\0' && *second != '\0');
-    return 0;
-}
-
-const char * err(int errcode) {
-    switch (errcode) { // todo errno consts
-        case 0:     return "Success";
-        case 1:     return "Operation not permitted";
-        case 2:     return "No such file or directory";
-        case 3:     return "No such process";
-        case 4:     return "Interrupted system call";
-        case 5:     return "Input/output error";
-        case 6:     return "Device not configured";
-        case 7:     return "Argument list too long";
-        case 8:     return "Exec format error";
-        case 9:     return "Bad file descriptor";
-        case 10:    return "No child processes";
-        case 11:    return "Resource deadlock avoided";
-        case 12:    return "Cannot allocate memory";
-        case 13:    return "Permission denied";
-        case 14:    return "Bad address";
-        case 15:    return "Block device required";
-        case 16:    return "Device / Resource busy";
-        case 17:    return "File exists";
-        case 18:    return "Cross-device link";
-        case 19:    return "Operation not supported by device";
-        case 20:    return "Not a directory";
-        case 21:    return "Is a directory";
-        case 22:    return "Invalid argument";
-        case 23:    return "Too many open files in system";
-        case 24:    return "Too many open files";
-        case 25:    return "Inappropriate ioctl for device";
-        case 26:    return "Text file busy";
-        case 27:    return "File too large";
-        case 28:    return "No space left on device";
-        case 29:    return "Illegal seek";
-        case 30:    return "Read-only file system";
-        case 31:    return "Too many links";
-        case 32:    return "Broken pipe";
-        case 33:    return "Numerical argument out of domain";
-        case 34:    return "Result too large";
-        case 35:    return "Resource temporarily unavailable";
-        case 36:    return "Operation now in progress";
-        case 37:    return "Operation already in progress";
-        case 38:    return "Socket operation on non-socket";
-        case 39:    return "Destination address required";
-        case 40:    return "Message too long";
-        case 41:    return "Protocol wrong type for socket";
-        case 42:    return "Protocol not available";
-        case 43:    return "Protocol not supported";
-        case 44:    return "Socket type not supported";
-        case 45:    return "Operation not supported";
-        case 46:    return "Protocol family not supported";
-        case 47:    return "Address family not supported by protocol family";
-        case 48:    return "Address already in use";
-        case 49:    return "Can't assign requested address";
-        case 50:    return "Network is down";
-        case 51:    return "Network is unreachable";
-        case 52:    return "Network dropped connection on reset";
-        case 53:    return "Software caused connection abort";
-        case 54:    return "Connection reset by peer";
-        case 55:    return "No buffer space available";
-        case 56:    return "Socket is already connected";
-        case 57:    return "Socket is not connected";
-        case 58:    return "Can't send after socket shutdown";
-        case 59:    return "Too many references: can't splice";
-        case 60:    return "Operation timed out";
-        case 61:    return "Connection refused";
-        case 62:    return "Too many levels of symbolic links";
-        case 63:    return "File name too long";
-        case 64:    return "Host is down";
-        case 65:    return "No route to host";
-        case 66:    return "Directory not empty";
-        case 67:    return "Too many processes";
-        case 68:    return "Too many users";
-        case 69:    return "Disc quota exceeded";
-        case 70:    return "Stale NFS file handle";
-        case 71:    return "Too many levels of remote in path";
-        case 72:    return "RPC struct is bad";
-        case 73:    return "RPC version wrong";
-        case 74:    return "RPC prog. not avail";
-        case 75:    return "Program version wrong";
-        case 76:    return "Bad procedure for program";
-        case 77:    return "No locks available";
-        case 78:    return "Function not implemented";
-        case 79:    return "Inappropriate file type or format";
-        case 80:    return "Authentication error";
-        case 81:    return "Need authenticator";
-        case 82:    return "Device power is off";
-        case 83:    return "Device error, e.g. paper out";
-        case 84:    return "Value too large to be stored in data type";
-        case 85:    return "Bad executable";
-        case 86:    return "Bad CPU type in executable";
-        case 87:    return "Shared library version mismatch";
-        case 88:    return "Malformed Macho file";
-        case 89:    return "Operation canceled";
-        case 90:    return "Identifier removed";
-        case 91:    return "No message of desired type";
-        case 92:    return "Illegal byte sequence";
-        case 93:    return "Attribute not found";
-        case 94:    return "Bad message";
-        case 95:    return "Reserved";
-        case 96:    return "No message available on STREAM";
-        case 97:    return "Reserved";
-        case 98:    return "No STREAM resources";
-        case 99:    return "Not a STREAM";
-        case 100:   return "Protocol error";
-        case 101:   return "STREAM ioctl timeout";
-        case 102:   return "Operation not supported on socket";
-        case 103:   return "No such policy registered";
-        case 104:   return "State not recoverable";
-        case 105:   return "Previous owner died";
-        case 106:   return "Interface output queue is full";
-        default:    return "Unknown error code";
-    }
-}
-
-char * mult(const char * src, size_t count) {
-    size_t src_len = len(src);
-    size_t size = src_len * count + 2;
-    char * str = (char *) calloc(size, sizeof(char));
-    char * ans = str;
-    for (; count > 0; --count) {
-        concat(str, src);
-        str += src_len;
-    }
-    return ans;
-}
-
-const char * find_str(const char * haystack, const char * needle) {
-    size_t needle_len = len(needle);
-    if (needle_len == 0)
-        return haystack;
-    if (len(haystack) < needle_len)
-        return NULL;
-
-    // Константы для полиномиального хеширования Рабина-Карпа
-    const size_t BASE = 256;              // Основание (размер алфавита)
-    const size_t MOD = 1000000007ULL;     // Простое число для модуля
-
-    // Вычисляем хеш для needle
-    size_t needle_hash = 0;
-    size_t pow_base = 1;
-    for (size_t i = 0; i < needle_len; ++i) {
-        needle_hash = (needle_hash * BASE + (unsigned char)needle[i]) % MOD;
-        if (i < needle_len - 1) {
-            pow_base = (pow_base * BASE) % MOD;
+mystr_t mult(const mystr_t *src, size_t count) {
+    if (!src || !src->str) return {nullptr, 0, 0};
+    size_t l = actual_len(src);
+    size_t total = l * count;
+    char *buf = (char *)(malloc(total + 1));
+    if (!buf) return {nullptr, 0, 0};
+    char *dst_ptr = buf;
+    for (size_t i = 0; i < count; ++i) {
+        if (l) {
+            memcpy(dst_ptr, src->str, l);
+            dst_ptr += l;
         }
     }
+    *dst_ptr = '\0';
+    mystr_t out{buf, total, 0};
+    out.hash = djb2(&out);
+    return out;
+}
 
-    // Вычисляем начальный rolling hash для первого окна в haystack
-    size_t rolling_hash = 0;
-    for (size_t i = 0; i < needle_len; ++i) {
-        rolling_hash = (rolling_hash * BASE + (unsigned char)haystack[i]) % MOD;
+const char * find_str(const mystr_t *haystack, const mystr_t *needle) {
+    return haystack && needle && haystack->str && needle->str ? strstr(haystack->str, needle->str) : nullptr;
+}
+
+ssize_t count_needle_in_haystack(const mystr_t *haystack, char needle) {
+    if (!haystack || !haystack->str) return -1;
+    ssize_t cnt = 0;
+    const char *ptr = haystack->str;
+    while ((ptr = strchr(ptr, needle))) {
+        ++cnt;
+        ++ptr;
     }
+    return cnt;
+}
 
-    // Проверяем первое окно
-    if (rolling_hash == needle_hash) {
-        bool match = true;
-        for (size_t i = 0; i < needle_len; ++i) {
-            if (haystack[i] != needle[i]) {
-                match = false;
-                break;
-            }
+ssize_t replace_needle_in_haystack(mystr_t *haystack, char src, char dst) {
+    if (!haystack || !haystack->str) return -1;
+    ssize_t cnt = 0;
+    for (size_t i = 0; haystack->str[i]; ++i)
+        if (haystack->str[i] == src) {
+            haystack->str[i] = dst;
+            ++cnt;
         }
-        if (match) return haystack;
+    if (cnt) {
+        haystack->len = strlen(haystack->str);
+        haystack->hash = djb2(haystack);
     }
+    return cnt;
+}
 
-    // Прокатываем окно по остальной части строки
-    for (size_t i = needle_len; i < len(haystack); ++i) {
-        // Удаляем первый символ из хеша и добавляем новый
-        rolling_hash = (rolling_hash + MOD - ((unsigned char)haystack[i - needle_len] * pow_base) % MOD) % MOD;
-        rolling_hash = (rolling_hash * BASE + (unsigned char)haystack[i]) % MOD;
-
-        // Проверяем совпадение хешей
-        if (rolling_hash == needle_hash) {
-            bool match = true;
-            for (size_t j = 0; j < needle_len; ++j) {
-                if (haystack[i - needle_len + 1 + j] != needle[j]) {
-                    match = false;
-                    break;
-                }
-            }
-            if (match) return &haystack[i - needle_len + 1];
+size_t move_ptr_to_first_alpha_symbol(const mystr_t *str, size_t start, int backword) {
+    size_t l = actual_len(str);
+    if (!str || !str->str || !l) return l;
+    if (start >= l) start = backword ? l - 1 : l;
+    if (backword) {
+        for (size_t i = start + 1; i-- > 0;) {
+            if (isalpha(static_cast<unsigned char>(str->str[i]))) return i;
+            if (!i) break;
         }
+        return l;
     }
-
-    return NULL;
+    for (size_t i = start; i < l; ++i)
+        if (isalpha(static_cast<unsigned char>(str->str[i]))) return i;
+    return l;
 }
 
-ssize_t count_needle_in_haystack(char * haystack, const size_t haystack_len, const char needle) {
-    assert(haystack != NULL     && "U must pass haystack to count needles");
-    assert(needle   != '\0'       && "U must pass needle other than '\\0'");
-
-    if (haystack == NULL) {
-        errno = EINVAL;
-        // ERROR_MSG("U must pass haystack to count needles");
-        return -1;
-    }
-
-    if (needle == '\0') {
-        errno = EINVAL;
-        // ERROR_MSG("U must pass needle other than '\\0'");
-        return -1;
-    }
-
-    ssize_t count = 0;
-    char * endptr = haystack + haystack_len;
-    while (haystack != NULL && haystack < endptr) {
-        haystack = strchr(haystack, needle);
-        if (haystack != NULL) {
-            ++count;
-            ++haystack;
+size_t move_ptr_to_first_not_space_symbol(const mystr_t *str, size_t start, int backword) {
+    size_t l = actual_len(str);
+    if (!str || !str->str || !l) return l;
+    if (start >= l) start = backword ? l - 1 : l;
+    if (backword) {
+        for (size_t i = start + 1; i-- > 0;) {
+            if (!isspace(static_cast<unsigned char>(str->str[i]))) return i;
+            if (!i) break;
         }
+        return l;
     }
-    return count; // Дошли до haystack_len но не встретили '\0'
+    for (size_t i = start; i < l; ++i)
+        if (!isspace(static_cast<unsigned char>(str->str[i]))) return i;
+    return l;
 }
 
-ssize_t replace_needle_in_haystack
-    (char * haystack, const size_t haystack_len, const char src, const char dst) {
-    assert(haystack != NULL         && "U must pass haystack to count needles");
-    assert(src      != '\0'         && "U must pass src other than '\\0'");
-
-    if (haystack == 0) {
-        errno = EINVAL;
-        // ERROR_MSG("U must pass haystack to count needles");
-        return -1;
-    }
-
-    if (src == '\0') {
-        errno = EINVAL;
-        // ERROR_MSG("U must pass src other than '\\0'");
-        return -1;
-    }
-
-    ssize_t count = 0;
-    char * endptr = haystack + haystack_len;
-    while (haystack != NULL && haystack < endptr) {
-        haystack = strchr(haystack, src);
-        if (haystack != NULL) {
-            ++count;
-            *haystack = dst;
-            ++haystack;
-        }
-    }
-    return count; // Дошли до haystack_len но не встретили '\0'
+int is_not_empty(const mystr_t *str) { 
+    return str && str->str && (str->len ? str->len : strlen(str->str)); 
 }
 
-int is_not_empty(const char *str) {
-    return str != NULL && str[0] != '\0';
+unsigned long djb2(const mystr_t *str) { 
+    return djb2_impl(str && str->str ? str->str : nullptr); 
 }
 
-void move_ptr_to_first_alpha_symbol(char ** ptr, int backword) {
-    assert(ptr != NULL);
-    assert(*ptr != NULL);
-
-    while (**ptr != '\0' && !isalpha(**ptr)) {
-        if (backword)
-            --(*ptr);
-        else // forward
-            ++(*ptr);
-    }
-}
-
-void move_ptr_to_first_not_space_symbol(char ** ptr, int backword) {
-    assert(ptr != NULL);
-    assert(*ptr != NULL);
-
-    while (**ptr != '\0' && isspace(**ptr)) {
-        if (backword)
-            --(*ptr);
-        else // forward
-            ++(*ptr);
-    }
-}
-
-/*
-this algorithm (k=33) was first reported by dan bernstein many years ago in comp.lang.c.
-another version of this algorithm (now favored by bernstein) uses xor:
-hash(i) = hash(i - 1) * 33 ^ str[i];
-the magic of number 33 (why it works better than many other constants, prime or not)
-has never been adequately explained.
-*/
-unsigned long hash(unsigned char *str) {
-    unsigned long hash = 5381;
-    int c;
-
-    while ((c = *str++) != '\0')
-        hash = ((hash << 5) + hash) + (unsigned long long) c; /* hash * 33 + c */
-
-    return hash;
-}
-
-/*
-this algorithm was created for sdbm (a public-domain reimplementation of ndbm) database library.
-it was found to do well in scrambling bits, causing better distribution of the keys and fewer splits.
-it also happens to be a good general hashing function with good distribution.
-the actual function is hash(i) = hash(i - 1) * 65599 + str[i];
-what is included below is the faster version used in gawk.
-[there is even a faster, duff-device version]
-the magic prime constant 65599 (2^6 + 2^16 - 1) was picked out of thin air
-while experimenting with many different constants. this is one of the algorithms
-used in berkeley db (see sleepycat) and elsewhere.
-*/
-unsigned long sdbm(const char * str) {
-    unsigned long hash = 0;
-    int c;
-
-    while ((c = *str++) != '\0')
-        hash = (unsigned long long) c + (hash << 16) + (hash << 6) - hash;
-
-    return hash != 0 ? hash : 1;
+unsigned long sdbm(const mystr_t *str) { 
+    return hash_sdbm_impl(str && str->str ? str->str : nullptr); 
 }
 
 }
