@@ -41,7 +41,7 @@ int put(const mystr_t *str);
  * @param str Указатель на строку для поиска
  * @param c Символ для поиска
  * @return Указатель на найденный символ или NULL если не найден
- * @note Дублирует функцию strchr() из <string.h>. Рекомендуется использовать стандартную версию.
+ * @note Аналог функции strchr() из <string.h>.
  */
 const char * find_char(const mystr_t *str, char c);
 
@@ -81,7 +81,7 @@ size_t cspan(const mystr_t *str, const mystr_t *reject);
  * @brief Вычисляет длину строки
  * @param str Указатель на строку
  * @return Длина строки в символах (без учета '\0')
- * @note Дублирует функцию strlen() из <string.h>. Рекомендуется использовать стандартную версию.
+ * @note Аналог функции strlen() из <string.h>.
  */
 size_t len(const mystr_t *str);
 
@@ -90,7 +90,7 @@ size_t len(const mystr_t *str);
  * @param dst Указатель на буфер назначения
  * @param src Указатель на исходную строку
  * @return Указатель на dst
- * @note Дублирует функцию strcpy() из <string.h>. Рекомендуется использовать стандартную версию.
+ * @note Аналог функции strcpy() из <string.h>. 
  */
 mystr_t * copy(mystr_t *dst, const mystr_t *src);
 
@@ -100,7 +100,7 @@ mystr_t * copy(mystr_t *dst, const mystr_t *src);
  * @param src Указатель на исходную строку
  * @param count Максимальное количество символов для копирования
  * @return Указатель на dst или NULL если count = 0
- * @note Дублирует функцию strncpy() из <string.h>. Рекомендуется использовать стандартную версию.
+ * @note Аналог функции strncpy() из <string.h>. 
  */
 mystr_t * ncopy(mystr_t *dst, const mystr_t *src, size_t count);
 
@@ -109,7 +109,7 @@ mystr_t * ncopy(mystr_t *dst, const mystr_t *src, size_t count);
  * @param dst Указатель на строку назначения
  * @param src Указатель на присоединяемую строку
  * @return Указатель на dst
- * @note Дублирует функцию strcat() из <string.h>. Рекомендуется использовать стандартную версию.
+ * @note Аналог функции strcat() из <string.h>. 
  */
 mystr_t * concat(mystr_t *dst, const mystr_t *src);
 
@@ -119,7 +119,7 @@ mystr_t * concat(mystr_t *dst, const mystr_t *src);
  * @param src Указатель на присоединяемую строку
  * @param count Максимальное количество символов для присоединения
  * @return Указатель на dst или NULL если count = 0
- * @note Дублирует функцию strncat() из <string.h>. Рекомендуется использовать стандартную версию.
+ * @note Аналог функции strncat() из <string.h>. 
  */
 mystr_t * nconcat(mystr_t *dst, const mystr_t *src, size_t count);
 
@@ -147,7 +147,7 @@ mystr_t * fget(mystr_t *str, FILE *stream);
  * @param count Максимальное количество символов для чтения
  * @param stream Файловый поток для чтения
  * @return Указатель на str или NULL при ошибке
- * @note Дублирует функцию fgets() из <stdio.h>. Рекомендуется использовать стандартную версию.
+ * @note Аналог функции fgets() из <stdio.h>. 
  */
 mystr_t * fnget(mystr_t *str, size_t count, FILE *stream);
 
@@ -155,7 +155,7 @@ mystr_t * fnget(mystr_t *str, size_t count, FILE *stream);
  * @brief Создает дубликат строки в динамической памяти
  * @param str Указатель на исходную строку
  * @return Указатель на новую выделенную строку (требует освобождения памяти)
- * @note Дублирует функцию strdup() из <string.h>. Рекомендуется использовать стандартную версию.
+ * @note Аналог функции strdup() из <string.h>. 
  */
 mystr_t dupe(const mystr_t *str);
 
@@ -165,7 +165,7 @@ mystr_t dupe(const mystr_t *str);
  * @param len Указатель на размер буфера (может быть изменен)
  * @param stream Файловый поток для чтения
  * @return Количество прочитанных символов или -1 при ошибке/EOF
- * @note Дублирует функцию getline() из <stdio.h> (POSIX). Рекомендуется использовать стандартную версию.
+ * @note Аналог функции getline() из <stdio.h> (POSIX). 
  */
 ssize_t getline(mystr_t *line, FILE *stream);
 
@@ -174,7 +174,7 @@ ssize_t getline(mystr_t *line, FILE *stream);
  * @param first Указатель на первую строку
  * @param second Указатель на вторую строку
  * @return положительное значение если first > second, отрицательное значение если first < second, 0 если равны
- * @note Дублирует функцию strcmp() из <string.h>. Рекомендуется использовать стандартную версию.
+ * @note Аналог функции strcmp() из <string.h>. 
  */
 int comp(const mystr_t *first, const mystr_t *second);
 
@@ -193,7 +193,7 @@ int comp_to(const mystr_t *first, const mystr_t *second, char final);
  * @param second Указатель на вторую строку
  * @param size Максимальное количество символов для сравнения
  * @return 1 если first > second, -1 если first < second, 0 если равны
- * @note Дублирует функцию strncmp() из <string.h>. Рекомендуется использовать стандартную версию.
+ * @note Аналог функции strncmp() из <string.h>. 
  */
 int ncomp(const mystr_t *first, const mystr_t *second, size_t size);
 
@@ -210,7 +210,7 @@ mystr_t mult(const mystr_t *src, size_t count);
  * @param haystack Указатель на строку для поиска
  * @param needle Указатель на искомую подстроку
  * @return Указатель на найденную подстроку или NULL если не найдена
- * @note Дублирует функцию strstr() из <string.h>. Рекомендуется использовать стандартную версию.
+ * @note Аналог функции strstr() из <string.h>. 
  */
 const char * find_str(const mystr_t *haystack, const mystr_t *needle);
 

@@ -10,13 +10,13 @@ static size_t actual_len(const mystr_t *s) { return s && s->str ? (s->len ? s->l
 static unsigned long djb2_impl(const char *s) {
     unsigned long h = 5381;
     if (!s) return 0;
-    for (unsigned char c; (c = static_cast<unsigned char>(*s++));) h = ((h << 5) + h) + c;
-    return h;
+    for (unsigned char c; (c = (unsigned char)(*s++));) h = ((h << 5) + h) + c;
+    return h ? h : 1;
 }
 static unsigned long hash_sdbm_impl(const char *s) {
     unsigned long h = 0;
     if (!s) return 1;
-    for (unsigned char c; (c = static_cast<unsigned char>(*s++));) h = c + (h << 6) + (h << 16) - h;
+    for (unsigned char c; (c = (unsigned char)(*s++));) h = c + (h << 6) + (h << 16) - h;
     return h ? h : 1;
 }
 
@@ -33,12 +33,12 @@ int put(const mystr_t *str) {
     return fputs(str->str, stdout) >= 0 ? 0 : -1;
 }
 
-const char * find_char(const mystr_t *str, char c) { 
-    return str && str->str ? strchr(str->str, c) : nullptr; 
+const char * find_char(const mystr_t *str, char c) {
+    return str && str->str ? strchr(str->str, c) : nullptr;
 }
 
-const char * find_last_char(const mystr_t *str, char c) { 
-    return str && str->str ? strrchr(str->str, c) : nullptr; 
+const char * find_last_char(const mystr_t *str, char c) {
+    return str && str->str ? strrchr(str->str, c) : nullptr;
 }
 
 const char * find_any(const mystr_t *str, const mystr_t *accept) {
@@ -135,8 +135,8 @@ static mystr_t * read_line(mystr_t *str, FILE *stream, ssize_t limit) {
     return str;
 }
 
-mystr_t * fget(mystr_t *str, FILE *stream) { 
-    return read_line(str, stream, -1); 
+mystr_t * fget(mystr_t *str, FILE *stream) {
+    return read_line(str, stream, -1);
 }
 
 mystr_t * fnget(mystr_t *str, size_t count, FILE *stream) {
@@ -168,8 +168,8 @@ int comp_to(const mystr_t *first, const mystr_t *second, char final) {
     if (!first || !second || !first->str || !second->str) return 0;
     const char *end1 = strchr(first->str, final);
     const char *end2 = strchr(second->str, final);
-    size_t l1 = end1 ? static_cast<size_t>(end1 - first->str + 1) : actual_len(first);
-    size_t l2 = end2 ? static_cast<size_t>(end2 - second->str + 1) : actual_len(second);
+    size_t l1 = end1 ? (size_t)(end1 - first->str + 1) : actual_len(first);
+    size_t l2 = end2 ? (size_t)(end2 - second->str + 1) : actual_len(second);
     size_t min_len = l1 < l2 ? l1 : l2;
     int res = strncmp(first->str, second->str, min_len);
     if (res) return res;
@@ -203,7 +203,10 @@ mystr_t mult(const mystr_t *src, size_t count) {
 }
 
 const char * find_str(const mystr_t *haystack, const mystr_t *needle) {
-    return haystack && needle && haystack->str && needle->str ? strstr(haystack->str, needle->str) : nullptr;
+    return haystack      &&
+           needle        &&
+           haystack->str &&
+           needle->str ? strstr(haystack->str, needle->str) : nullptr;
 }
 
 ssize_t count_needle_in_haystack(const mystr_t *haystack, char needle) {
@@ -238,13 +241,13 @@ size_t move_ptr_to_first_alpha_symbol(const mystr_t *str, size_t start, int back
     if (start >= l) start = backword ? l - 1 : l;
     if (backword) {
         for (size_t i = start + 1; i-- > 0;) {
-            if (isalpha(static_cast<unsigned char>(str->str[i]))) return i;
+            if (isalpha((unsigned char)(str->str[i]))) return i;
             if (!i) break;
         }
         return l;
     }
     for (size_t i = start; i < l; ++i)
-        if (isalpha(static_cast<unsigned char>(str->str[i]))) return i;
+        if (isalpha((unsigned char)(str->str[i]))) return i;
     return l;
 }
 
@@ -254,26 +257,26 @@ size_t move_ptr_to_first_not_space_symbol(const mystr_t *str, size_t start, int 
     if (start >= l) start = backword ? l - 1 : l;
     if (backword) {
         for (size_t i = start + 1; i-- > 0;) {
-            if (!isspace(static_cast<unsigned char>(str->str[i]))) return i;
+            if (!isspace((unsigned char)(str->str[i]))) return i;
             if (!i) break;
         }
         return l;
     }
     for (size_t i = start; i < l; ++i)
-        if (!isspace(static_cast<unsigned char>(str->str[i]))) return i;
+        if (!isspace((unsigned char)(str->str[i]))) return i;
     return l;
 }
 
-int is_not_empty(const mystr_t *str) { 
-    return str && str->str && (str->len ? str->len : strlen(str->str)); 
+int is_not_empty(const mystr_t *str) {
+    return str && str->str && (str->len ? str->len : strlen(str->str));
 }
 
-unsigned long djb2(const mystr_t *str) { 
-    return djb2_impl(str && str->str ? str->str : nullptr); 
+unsigned long djb2(const mystr_t *str) {
+    return djb2_impl(str && str->str ? str->str : nullptr);
 }
 
-unsigned long sdbm(const mystr_t *str) { 
-    return hash_sdbm_impl(str && str->str ? str->str : nullptr); 
+unsigned long sdbm(const mystr_t *str) {
+    return hash_sdbm_impl(str && str->str ? str->str : nullptr);
 }
 
 }
