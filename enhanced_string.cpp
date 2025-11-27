@@ -66,7 +66,7 @@ int is_not_empty(const char *str) {
     return str != NULL && str[0] != '\0';
 }
 
-void move_ptr_to_first_alpha_symbol(char ** ptr, int backword) {
+void move_ptr_to_first_alpha_symbol(const char ** ptr, int backword) {
     assert(ptr != NULL);
     assert(*ptr != NULL);
 
@@ -78,7 +78,7 @@ void move_ptr_to_first_alpha_symbol(char ** ptr, int backword) {
     }
 }
 
-void move_ptr_to_first_not_space_symbol(char ** ptr, int backword) {
+void move_ptr_to_first_not_space_symbol(const char ** ptr, int backword) {
     assert(ptr != NULL);
     assert(*ptr != NULL);
 
@@ -97,7 +97,7 @@ hash(i) = hash(i - 1) * 33 ^ str[i];
 the magic of number 33 (why it works better than many other constants, prime or not)
 has never been adequately explained.
 */
-unsigned long hash(unsigned char *str) {
+unsigned long djb2(const unsigned char *str) {
     unsigned long hash = 5381;
     int c;
 

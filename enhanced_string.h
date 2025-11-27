@@ -37,7 +37,7 @@ ssize_t replace_needle_in_haystack
  *       внутри одной нуль-терминированной строки; выход за её границы приводит к
  *       неопределённому поведению.
  */
-void move_ptr_to_first_alpha_symbol(char ** ptr, int backword);
+void move_ptr_to_first_alpha_symbol(const char ** ptr, int backword);
 
 /**
  * @brief Перемещает указатель к ближайшему символу, отличному от пробельного, относительно текущей позиции
@@ -53,7 +53,7 @@ void move_ptr_to_first_alpha_symbol(char ** ptr, int backword);
  *       внутри одной нуль-терминированной строки; выход за её границы приводит к
  *       неопределённому поведению.
  */
-void move_ptr_to_first_not_space_symbol(char ** ptr, int backword);
+void move_ptr_to_first_not_space_symbol(const char ** ptr, int backword);
 
 /**
  * @brief Проверяет, что строка не является NULL и не пустой
@@ -74,7 +74,7 @@ int is_not_empty(const char *str);
  * @param str Указатель на строку для хэширования
  * @return Хэш-значение строки
  */
-unsigned long djb2(unsigned char *str);
+unsigned long djb2(const unsigned char *str);
 
 /**
  * @brief Вычисляет хэш строки по алгоритму sdbm
@@ -93,6 +93,6 @@ unsigned long djb2(unsigned char *str);
  * @param str Указатель на строку для хэширования
  * @return Хэш-значение строки
  */
-unsigned long sdbm(const char * str);
+unsigned long sdbm(const const char * str);
 
 #endif // ENHANCED_STRING_H
