@@ -93,6 +93,6 @@ unsigned long djb2(const unsigned char *str);
  * @param str Указатель на строку для хэширования
  * @return Хэш-значение строки
  */
-unsigned long sdbm(const const char * str);
+unsigned long sdbm(const char * str);
 
 #endif // ENHANCED_STRING_H
