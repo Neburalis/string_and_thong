@@ -3,9 +3,9 @@
 #include <stdlib.h>
 #include <sys/types.h>
 
-namespace mystr {
+namespace x_str {
 
-static size_t actual_len(const mystr_t *s) { return s && s->str ? (s->len ? s->len : strlen(s->str)) : 0; }
+static size_t actual_len(const x_str_t *s) { return s && s->str ? (s->len ? s->len : strlen(s->str)) : 0; }
 
 static unsigned long djb2_impl(const char *s) {
     unsigned long h = 5381;
@@ -20,42 +20,42 @@ static unsigned long hash_sdbm_impl(const char *s) {
     return h ? h : 1;
 }
 
-mystr_t construct(char *str) {
-    mystr_t res {str, 0, 0};
+x_str_t construct(char *str) {
+    x_str_t res {str, 0, 0};
     if (!str) return res;
     res.len = strlen(str);
     res.hash = djb2(&res);
     return res;
 }
 
-int put(const mystr_t *str) {
+int put(const x_str_t *str) {
     if (!str || !str->str) return -1;
     return fputs(str->str, stdout) >= 0 ? 0 : -1;
 }
 
-const char * find_char(const mystr_t *str, char c) {
+const char * find_char(const x_str_t *str, char c) {
     return str && str->str ? strchr(str->str, c) : nullptr;
 }
 
-const char * find_last_char(const mystr_t *str, char c) {
+const char * find_last_char(const x_str_t *str, char c) {
     return str && str->str ? strrchr(str->str, c) : nullptr;
 }
 
-const char * find_any(const mystr_t *str, const mystr_t *accept) {
+const char * find_any(const x_str_t *str, const x_str_t *accept) {
     return str && str->str && accept && accept->str ? strpbrk(str->str, accept->str) : nullptr;
 }
 
-size_t span(const mystr_t *str, const mystr_t *accept) {
+size_t span(const x_str_t *str, const x_str_t *accept) {
     return str && str->str && accept && accept->str ? strspn(str->str, accept->str) : 0;
 }
 
-size_t cspan(const mystr_t *str, const mystr_t *reject) {
+size_t cspan(const x_str_t *str, const x_str_t *reject) {
     return str && str->str && reject && reject->str ? strcspn(str->str, reject->str) : 0;
 }
 
-size_t len(const mystr_t *str) { return actual_len(str); }
+size_t len(const x_str_t *str) { return actual_len(str); }
 
-mystr_t * copy(mystr_t *dst, const mystr_t *src) {
+x_str_t * copy(x_str_t *dst, const x_str_t *src) {
     if (!dst || !src || !dst->str || !src->str) return nullptr;
     strcpy(dst->str, src->str);
     dst->len = actual_len(src);
@@ -63,7 +63,7 @@ mystr_t * copy(mystr_t *dst, const mystr_t *src) {
     return dst;
 }
 
-mystr_t * ncopy(mystr_t *dst, const mystr_t *src, size_t count) {
+x_str_t * ncopy(x_str_t *dst, const x_str_t *src, size_t count) {
     if (!count || !dst || !src || !dst->str || !src->str) return nullptr;
     strncpy(dst->str, src->str, count);
     size_t written = strnlen(src->str, count);
@@ -73,7 +73,7 @@ mystr_t * ncopy(mystr_t *dst, const mystr_t *src, size_t count) {
     return dst;
 }
 
-mystr_t * concat(mystr_t *dst, const mystr_t *src) {
+x_str_t * concat(x_str_t *dst, const x_str_t *src) {
     if (!dst || !src || !dst->str || !src->str) return nullptr;
     size_t l1 = actual_len(dst), l2 = actual_len(src);
     strcat(dst->str, src->str);
@@ -82,7 +82,7 @@ mystr_t * concat(mystr_t *dst, const mystr_t *src) {
     return dst;
 }
 
-mystr_t * nconcat(mystr_t *dst, const mystr_t *src, size_t count) {
+x_str_t * nconcat(x_str_t *dst, const x_str_t *src, size_t count) {
     if (!count || !dst || !src || !dst->str || !src->str) return nullptr;
     strncat(dst->str, src->str, count);
     dst->len = strlen(dst->str);
@@ -90,19 +90,19 @@ mystr_t * nconcat(mystr_t *dst, const mystr_t *src, size_t count) {
     return dst;
 }
 
-mystr_t dupe_concat(const mystr_t *first, const mystr_t *second) {
+x_str_t dupe_concat(const x_str_t *first, const x_str_t *second) {
     size_t l1 = actual_len(first), l2 = actual_len(second);
     char *buf = (char *)(malloc(l1 + l2 + 1));
     if (!buf) return {nullptr, 0, 0};
     if (first && first->str) memcpy(buf, first->str, l1);
     if (second && second->str) memcpy(buf + l1, second->str, l2);
     buf[l1 + l2] = '\0';
-    mystr_t out{buf, l1 + l2, 0};
+    x_str_t out{buf, l1 + l2, 0};
     out.hash = djb2(&out);
     return out;
 }
 
-static mystr_t * read_line(mystr_t *str, FILE *stream, ssize_t limit) {
+static x_str_t * read_line(x_str_t *str, FILE *stream, ssize_t limit) {
     if (!str || !stream) return nullptr;
     size_t cap = str->str ? actual_len(str) + 1 : 64;
     if (!cap) cap = 64;
@@ -135,36 +135,36 @@ static mystr_t * read_line(mystr_t *str, FILE *stream, ssize_t limit) {
     return str;
 }
 
-mystr_t * fget(mystr_t *str, FILE *stream) {
+x_str_t * fget(x_str_t *str, FILE *stream) {
     return read_line(str, stream, -1);
 }
 
-mystr_t * fnget(mystr_t *str, size_t count, FILE *stream) {
+x_str_t * fnget(x_str_t *str, size_t count, FILE *stream) {
     if (!count) return nullptr;
     ssize_t limit = static_cast<ssize_t>(count);
     return read_line(str, stream, limit - 1);
 }
 
-mystr_t dupe(const mystr_t *str) {
+x_str_t dupe(const x_str_t *str) {
     if (!str || !str->str) return {nullptr, 0, 0};
     char *copy_str = strdup(str->str);
     if (!copy_str) return {nullptr, 0, 0};
-    mystr_t out{copy_str, actual_len(str), 0};
+    x_str_t out{copy_str, actual_len(str), 0};
     out.hash = djb2(&out);
     return out;
 }
 
-ssize_t getline(mystr_t *line, FILE *stream) {
+ssize_t getline(x_str_t *line, FILE *stream) {
     if (!read_line(line, stream, -1)) return -1;
     return static_cast<ssize_t>(line->len);
 }
 
-int comp(const mystr_t *first, const mystr_t *second) {
+int comp(const x_str_t *first, const x_str_t *second) {
     if (!first || !second || !first->str || !second->str) return 0;
     return strcmp(first->str, second->str);
 }
 
-int comp_to(const mystr_t *first, const mystr_t *second, char final) {
+int comp_to(const x_str_t *first, const x_str_t *second, char final) {
     if (!first || !second || !first->str || !second->str) return 0;
     const char *end1 = strchr(first->str, final);
     const char *end2 = strchr(second->str, final);
@@ -177,13 +177,13 @@ int comp_to(const mystr_t *first, const mystr_t *second, char final) {
     return l1 < l2 ? -1 : 1;
 }
 
-int ncomp(const mystr_t *first, const mystr_t *second, size_t size) {
+int ncomp(const x_str_t *first, const x_str_t *second, size_t size) {
     if (!first || !second || !first->str || !second->str) return 0;
     int res = strncmp(first->str, second->str, size);
     return res ? (res > 0 ? 1 : -1) : 0;
 }
 
-mystr_t mult(const mystr_t *src, size_t count) {
+x_str_t mult(const x_str_t *src, size_t count) {
     if (!src || !src->str) return {nullptr, 0, 0};
     size_t l = actual_len(src);
     size_t total = l * count;
@@ -197,19 +197,19 @@ mystr_t mult(const mystr_t *src, size_t count) {
         }
     }
     *dst_ptr = '\0';
-    mystr_t out{buf, total, 0};
+    x_str_t out{buf, total, 0};
     out.hash = djb2(&out);
     return out;
 }
 
-const char * find_str(const mystr_t *haystack, const mystr_t *needle) {
+const char * find_str(const x_str_t *haystack, const x_str_t *needle) {
     return haystack      &&
            needle        &&
            haystack->str &&
            needle->str ? strstr(haystack->str, needle->str) : nullptr;
 }
 
-ssize_t count_needle_in_haystack(const mystr_t *haystack, char needle) {
+ssize_t count_needle_in_haystack(const x_str_t *haystack, char needle) {
     if (!haystack || !haystack->str) return -1;
     ssize_t cnt = 0;
     const char *ptr = haystack->str;
@@ -220,7 +220,7 @@ ssize_t count_needle_in_haystack(const mystr_t *haystack, char needle) {
     return cnt;
 }
 
-ssize_t replace_needle_in_haystack(mystr_t *haystack, char src, char dst) {
+ssize_t replace_needle_in_haystack(x_str_t *haystack, char src, char dst) {
     if (!haystack || !haystack->str) return -1;
     ssize_t cnt = 0;
     for (size_t i = 0; haystack->str[i]; ++i)
@@ -235,7 +235,7 @@ ssize_t replace_needle_in_haystack(mystr_t *haystack, char src, char dst) {
     return cnt;
 }
 
-size_t move_ptr_to_first_alpha_symbol(const mystr_t *str, size_t start, int backword) {
+size_t move_ptr_to_first_alpha_symbol(const x_str_t *str, size_t start, int backword) {
     size_t l = actual_len(str);
     if (!str || !str->str || !l) return l;
     if (start >= l) start = backword ? l - 1 : l;
@@ -251,7 +251,7 @@ size_t move_ptr_to_first_alpha_symbol(const mystr_t *str, size_t start, int back
     return l;
 }
 
-size_t move_ptr_to_first_not_space_symbol(const mystr_t *str, size_t start, int backword) {
+size_t move_ptr_to_first_not_space_symbol(const x_str_t *str, size_t start, int backword) {
     size_t l = actual_len(str);
     if (!str || !str->str || !l) return l;
     if (start >= l) start = backword ? l - 1 : l;
@@ -267,15 +267,15 @@ size_t move_ptr_to_first_not_space_symbol(const mystr_t *str, size_t start, int 
     return l;
 }
 
-int is_not_empty(const mystr_t *str) {
+int is_not_empty(const x_str_t *str) {
     return str && str->str && (str->len ? str->len : strlen(str->str));
 }
 
-unsigned long djb2(const mystr_t *str) {
+unsigned long djb2(const x_str_t *str) {
     return djb2_impl(str && str->str ? str->str : nullptr);
 }
 
-unsigned long sdbm(const mystr_t *str) {
+unsigned long sdbm(const x_str_t *str) {
     return hash_sdbm_impl(str && str->str ? str->str : nullptr);
 }
 

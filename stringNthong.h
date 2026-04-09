@@ -5,36 +5,36 @@
 #include <string.h>
 #include <stdint.h>
 
-namespace mystr {
+namespace x_str {
 
-typedef struct mystr_t {
+typedef struct x_str_t {
     char            *str;
     uint64_t       len;
     unsigned long   hash;
 
     /**
-     * @brief Сравнивает текущий объект с другим экземпляром mystr_t
-     * @param second Указатель на второй объект mystr_t
+     * @brief Сравнивает текущий объект с другим экземпляром x_str_t
+     * @param second Указатель на второй объект x_str_t
      * @return true если строки идентичны, false иначе
      */
-    bool is_same(const mystr_t *second) {
+    bool is_same(const x_str_t *second) {
         return second && str && second->str && hash == second->hash && strcmp(str, second->str) == 0;
     }
-} mystr_t;
+} x_str_t;
 
 /**
- * @brief Создаёт структуру mystr_t на основе переданной C-строки
+ * @brief Создаёт структуру x_str_t на основе переданной C-строки
  * @param str Указатель на строку, чья память управляется вызывающей стороной
- * @return Инициализированная структура mystr_t или пустая, если str == NULL
+ * @return Инициализированная структура x_str_t или пустая, если str == NULL
  */
-mystr_t construct(char *str);
+x_str_t construct(char *str);
 
 /**
  * @brief Выводит строку посимвольно в stdout
  * @param str Указатель на строку для вывода
  * @return 0 при успешном выполнении
  */
-int put(const mystr_t *str);
+int put(const x_str_t *str);
 
 /**
  * @brief Ищет первое вхождение символа в строке
@@ -43,7 +43,7 @@ int put(const mystr_t *str);
  * @return Указатель на найденный символ или NULL если не найден
  * @note Аналог функции strchr() из <string.h>.
  */
-const char * find_char(const mystr_t *str, char c);
+const char * find_char(const x_str_t *str, char c);
 
 /**
  * @brief Ищет последнее вхождение символа в строке
@@ -51,7 +51,7 @@ const char * find_char(const mystr_t *str, char c);
  * @param c Символ для поиска
  * @return Указатель на найденный символ или NULL, если символ отсутствует
  */
-const char * find_last_char(const mystr_t *str, char c);
+const char * find_last_char(const x_str_t *str, char c);
 
 /**
  * @brief Ищет первое вхождение любого символа из accept
@@ -59,7 +59,7 @@ const char * find_last_char(const mystr_t *str, char c);
  * @param accept Набор символов, которые требуется найти
  * @return Указатель на найденный символ или NULL, если совпадений нет
  */
-const char * find_any(const mystr_t *str, const mystr_t *accept);
+const char * find_any(const x_str_t *str, const x_str_t *accept);
 
 /**
  * @brief Подсчитывает длину начального сегмента str, содержащего только символы из accept
@@ -67,7 +67,7 @@ const char * find_any(const mystr_t *str, const mystr_t *accept);
  * @param accept Набор допустимых символов
  * @return Длина сегмента
  */
-size_t span(const mystr_t *str, const mystr_t *accept);
+size_t span(const x_str_t *str, const x_str_t *accept);
 
 /**
  * @brief Подсчитывает длину начального сегмента str, НЕ содержащего символы из reject
@@ -75,7 +75,7 @@ size_t span(const mystr_t *str, const mystr_t *accept);
  * @param reject Набор запрещённых символов
  * @return Длина сегмента
  */
-size_t cspan(const mystr_t *str, const mystr_t *reject);
+size_t cspan(const x_str_t *str, const x_str_t *reject);
 
 /**
  * @brief Вычисляет длину строки
@@ -83,7 +83,7 @@ size_t cspan(const mystr_t *str, const mystr_t *reject);
  * @return Длина строки в символах (без учета '\0')
  * @note Аналог функции strlen() из <string.h>.
  */
-size_t len(const mystr_t *str);
+size_t len(const x_str_t *str);
 
 /**
  * @brief Копирует строку src в dst
@@ -92,7 +92,7 @@ size_t len(const mystr_t *str);
  * @return Указатель на dst
  * @note Аналог функции strcpy() из <string.h>.
  */
-mystr_t * copy(mystr_t *dst, const mystr_t *src);
+x_str_t * copy(x_str_t *dst, const x_str_t *src);
 
 /**
  * @brief Копирует не более count символов из src в dst
@@ -102,7 +102,7 @@ mystr_t * copy(mystr_t *dst, const mystr_t *src);
  * @return Указатель на dst или NULL если count = 0
  * @note Аналог функции strncpy() из <string.h>.
  */
-mystr_t * ncopy(mystr_t *dst, const mystr_t *src, size_t count);
+x_str_t * ncopy(x_str_t *dst, const x_str_t *src, size_t count);
 
 /**
  * @brief Присоединяет строку src к концу строки dst
@@ -111,7 +111,7 @@ mystr_t * ncopy(mystr_t *dst, const mystr_t *src, size_t count);
  * @return Указатель на dst
  * @note Аналог функции strcat() из <string.h>.
  */
-mystr_t * concat(mystr_t *dst, const mystr_t *src);
+x_str_t * concat(x_str_t *dst, const x_str_t *src);
 
 /**
  * @brief Присоединяет не более count символов из src к концу строки dst
@@ -121,7 +121,7 @@ mystr_t * concat(mystr_t *dst, const mystr_t *src);
  * @return Указатель на dst или NULL если count = 0
  * @note Аналог функции strncat() из <string.h>.
  */
-mystr_t * nconcat(mystr_t *dst, const mystr_t *src, size_t count);
+x_str_t * nconcat(x_str_t *dst, const x_str_t *src, size_t count);
 
 /**
  * @brief Создает новую строку путем конкатенации двух строк
@@ -129,7 +129,7 @@ mystr_t * nconcat(mystr_t *dst, const mystr_t *src, size_t count);
  * @param second Указатель на вторую строку
  * @return Указатель на новую выделенную строку (требует освобождения памяти)
  */
-mystr_t dupe_concat(const mystr_t *first, const mystr_t *second);
+x_str_t dupe_concat(const x_str_t *first, const x_str_t *second);
 
 /**
  * @brief Читает строку из файлового потока до символа новой строки
@@ -139,7 +139,7 @@ mystr_t dupe_concat(const mystr_t *first, const mystr_t *second);
  * @note Похожа на функцию fgets() из <stdio.h>, но без ограничения размера буфера.
  *       Рекомендуется использовать стандартную fgets() с проверкой размера буфера.
  */
-mystr_t * fget(mystr_t *str, FILE *stream);
+x_str_t * fget(x_str_t *str, FILE *stream);
 
 /**
  * @brief Читает не более count символов из файлового потока до символа новой строки
@@ -149,7 +149,7 @@ mystr_t * fget(mystr_t *str, FILE *stream);
  * @return Указатель на str или NULL при ошибке
  * @note Аналог функции fgets() из <stdio.h>.
  */
-mystr_t * fnget(mystr_t *str, size_t count, FILE *stream);
+x_str_t * fnget(x_str_t *str, size_t count, FILE *stream);
 
 /**
  * @brief Создает дубликат строки в динамической памяти
@@ -157,7 +157,7 @@ mystr_t * fnget(mystr_t *str, size_t count, FILE *stream);
  * @return Указатель на новую выделенную строку (требует освобождения памяти)
  * @note Аналог функции strdup() из <string.h>.
  */
-mystr_t dupe(const mystr_t *str);
+x_str_t dupe(const x_str_t *str);
 
 /**
  * @brief Читает строку переменной длины из файлового потока с автоматическим выделением памяти
@@ -167,7 +167,7 @@ mystr_t dupe(const mystr_t *str);
  * @return Количество прочитанных символов или -1 при ошибке/EOF
  * @note Аналог функции getline() из <stdio.h> (POSIX).
  */
-ssize_t getline(mystr_t *line, FILE *stream);
+ssize_t getline(x_str_t *line, FILE *stream);
 
 /**
  * @brief Поэлементно сравнивает две строки лексикографически
@@ -176,7 +176,7 @@ ssize_t getline(mystr_t *line, FILE *stream);
  * @return положительное значение если first > second, отрицательное значение если first < second, 0 если равны
  * @note Аналог функции strcmp() из <string.h>.
  */
-int comp(const mystr_t *first, const mystr_t *second);
+int comp(const x_str_t *first, const x_str_t *second);
 
 /**
  * @brief Сравнивает две строки лексикографически до указанного символа-границы (сравниваются подстроки до первого включения символа-границы)
@@ -185,7 +185,7 @@ int comp(const mystr_t *first, const mystr_t *second);
  * @param final Символ, до которого производится сравнение
  * @return положительное значение если first > second, отрицательное значение если first < second, 0 если равны
  */
-int comp_to(const mystr_t *first, const mystr_t *second, char final);
+int comp_to(const x_str_t *first, const x_str_t *second, char final);
 
 /**
  * @brief Поэлементно сравнивает не более size символов двух строк
@@ -195,7 +195,7 @@ int comp_to(const mystr_t *first, const mystr_t *second, char final);
  * @return 1 если first > second, -1 если first < second, 0 если равны
  * @note Аналог функции strncmp() из <string.h>.
  */
-int ncomp(const mystr_t *first, const mystr_t *second, size_t size);
+int ncomp(const x_str_t *first, const x_str_t *second, size_t size);
 
 /**
  * @brief Создает новую строку путем повторения исходной строки count раз
@@ -203,7 +203,7 @@ int ncomp(const mystr_t *first, const mystr_t *second, size_t size);
  * @param count Количество повторений
  * @return Указатель на новую выделенную строку (требует освобождения памяти)
  */
-mystr_t mult(const mystr_t *src, size_t count);
+x_str_t mult(const x_str_t *src, size_t count);
 
 /**
  * @brief Ищет подстроку в строке используя rolling hash алгоритм
@@ -212,7 +212,7 @@ mystr_t mult(const mystr_t *src, size_t count);
  * @return Указатель на найденную подстроку или NULL если не найдена
  * @note Аналог функции strstr() из <string.h>.
  */
-const char * find_str(const mystr_t *haystack, const mystr_t *needle);
+const char * find_str(const x_str_t *haystack, const x_str_t *needle);
 
 /**
  * @brief Подсчитывает количество вхождений символа в строке ограниченной длины
@@ -221,7 +221,7 @@ const char * find_str(const mystr_t *haystack, const mystr_t *needle);
  * @param needle Искомый символ
  * @return Количество найденных символов или -1 при ошибке
  */
-ssize_t count_needle_in_haystack(const mystr_t *haystack, char needle);
+ssize_t count_needle_in_haystack(const x_str_t *haystack, char needle);
 
 /**
  * @brief Заменяет все вхождения символа src на символ dst в строке ограниченной длины
@@ -231,7 +231,7 @@ ssize_t count_needle_in_haystack(const mystr_t *haystack, char needle);
  * @param dst Символ для замены
  * @return Количество замененных символов или -1 при ошибке
  */
-ssize_t replace_needle_in_haystack(mystr_t *haystack, char src, char dst);
+ssize_t replace_needle_in_haystack(x_str_t *haystack, char src, char dst);
 
 /**
  * @brief Перемещает указатель к ближайшему алфавитному символу относительно текущей позиции
@@ -247,7 +247,7 @@ ssize_t replace_needle_in_haystack(mystr_t *haystack, char src, char dst);
  *       внутри одной нуль-терминированной строки; выход за её границы приводит к
  *       неопределённому поведению.
  */
-size_t move_ptr_to_first_alpha_symbol(const mystr_t *str, size_t start, int backword);
+size_t move_ptr_to_first_alpha_symbol(const x_str_t *str, size_t start, int backword);
 
 /**
  * @brief Перемещает указатель к ближайшему символу, отличному от пробельного, относительно текущей позиции
@@ -263,14 +263,14 @@ size_t move_ptr_to_first_alpha_symbol(const mystr_t *str, size_t start, int back
  *       внутри одной нуль-терминированной строки; выход за её границы приводит к
  *       неопределённому поведению.
  */
-size_t move_ptr_to_first_not_space_symbol(const mystr_t *str, size_t start, int backword);
+size_t move_ptr_to_first_not_space_symbol(const x_str_t *str, size_t start, int backword);
 
 /**
  * @brief Проверяет, что строка не является NULL и не пустой
  * @param str Указатель на строку для проверки
  * @return Ненулевое значение если строка не пустая, 0 если пустая или NULL
  */
-int is_not_empty(const mystr_t *str);
+int is_not_empty(const x_str_t *str);
 
 /**
  * @brief Вычисляет хэш строки по алгоритму djb2 (Dan Bernstein)
@@ -284,7 +284,7 @@ int is_not_empty(const mystr_t *str);
  * @param str Указатель на строку для хэширования
  * @return Хэш-значение строки
  */
-unsigned long djb2(const mystr_t *str);
+unsigned long djb2(const x_str_t *str);
 
 /**
  * @brief Вычисляет хэш строки по алгоритму sdbm
@@ -305,7 +305,7 @@ unsigned long djb2(const mystr_t *str);
  *
  * @details Значение 0 принято как poison и никакой хеш не может его иметь
  */
-unsigned long sdbm(const mystr_t *str);
+unsigned long sdbm(const x_str_t *str);
 
 }
 
